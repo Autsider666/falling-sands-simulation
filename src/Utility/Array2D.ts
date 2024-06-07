@@ -1,23 +1,25 @@
 import {Random} from "excalibur";
+import {Particle} from "../FallingSand/Particle/Particle.ts";
 
 type Coordinate = { x: number, y: number };
 
-export class Array2D<I> {
+export class Array2D<I extends Particle> { //TODO fix so it's usable for everything
     private store: Array<I>;
-    private readonly changedIndexes = new Set<number>();
+    public readonly changedIndexes = new Set<number>();
     private readonly random = new Random(); //TODO replace with better solution
 
     constructor(
         readonly height: number,
         readonly width: number,
-        private readonly defaultValue: I,
+        private readonly defaultValue: (index: number) => I,
         private readonly equalityCheck: (a: I, b: I) => boolean
     ) {
-        this.store = new Array<I>(this.width * this.height).fill(this.defaultValue);
+        // this.store = new Array<I>(this.width * this.height).fill(this.defaultValue);
+        this.store = [...Array<I>(this.width * this.height)].map((_, index) => defaultValue(index));
     }
 
     clear(): void {
-        this.store = new Array<I>(this.width * this.height).fill(this.defaultValue);
+        this.store = [...Array<I>(this.width * this.height)].map((_, index) => this.defaultValue(index));
         this.changedIndexes.clear();
     }
 
@@ -37,6 +39,7 @@ export class Array2D<I> {
         const index = y * this.width + x;
         this.store[index] = item;
         this.changedIndexes.add(index);
+        item.index = index;
     }
 
     swap(coordinateA: Coordinate, coordinateB: Coordinate): void {
@@ -83,7 +86,7 @@ export class Array2D<I> {
                 // Go from right to left or left to right depending on our random value
                 const columnOffset = leftToRight ? i : -i - 1 + this.width;
                 const index = rowOffset + columnOffset;
-                const {x,y} =this.toCoordinates(index);
+                const {x, y} = this.toCoordinates(index);
 
                 callback(this.getIndex(index), {x, y, i});
             }
@@ -96,11 +99,7 @@ export class Array2D<I> {
         return {x, y};
     }
 
-    getLastChanges(reset: boolean = true): number[] {
-        const changes = Array.from(this.changedIndexes);
-        if (reset) {
-            this.changedIndexes.clear();
-        }
-        return changes;
+    toIndex(x: number, y: number): number {
+        return y * this.width + x;
     }
 }

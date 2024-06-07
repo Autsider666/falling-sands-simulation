@@ -12,7 +12,7 @@ export class World extends Actor {
     private readonly random = new Random();
     private primaryPointer?: PointerAbstraction;
 
-    private currentParticleType: Constructor<Particle> = Sand;
+    private currentParticleType: Constructor<Particle,number[]> = Sand;
 
     private drawRadius: number = 3;
 
@@ -33,7 +33,7 @@ export class World extends Actor {
             width: gridWidth * particleSize,
             anchor: Vector.Zero,
         });
-        this.grid = new Array2D<Particle>(gridHeight, gridWidth, new Air(), (a, b) => a.empty && b.empty);
+        this.grid = new Array2D<Particle>(gridHeight, gridWidth, (index:number) => new Air(index), (a, b) => a.empty && b.empty);
 
         this.canvas = new DirtyCanvas({
             height: gridHeight * particleSize,
@@ -56,13 +56,13 @@ export class World extends Actor {
         if (this.isDrawing) {
             this.createParticles(
                 this.primaryPointer.lastWorldPos,
-                () => new this.currentParticleType(),
+                (index:number) => new this.currentParticleType(index),
                 this.drawRadius,
                 0.5,
             );
         }
 
-        if (this.cleared || this.grid.getLastChanges(false).length) {
+        if (this.cleared || this.grid.changedIndexes.size) {
             this.canvas.flagDirty();
         }
 
@@ -71,7 +71,7 @@ export class World extends Actor {
         }
     }
 
-    public setCurrentParticle(particleCreator: Constructor<Particle>): void {
+    public setCurrentParticle(particleCreator: Constructor<Particle,number[]>): void {
         this.currentParticleType = particleCreator;
     }
 
@@ -82,8 +82,9 @@ export class World extends Actor {
             this.cleared = false;
         }
 
-        this.grid.getLastChanges().forEach(index => {
+        this.grid.changedIndexes.forEach(index => {
             const particle = this.grid.getIndex(index);
+
             const {x, y} = this.grid.toCoordinates(index);
             // this.grid.forEach((particle,{x,y}) => {
             // if (particle instanceof Air) { //TODO check if this is maybe better
@@ -94,6 +95,8 @@ export class World extends Actor {
 
             ctx.fillRect(x * this.particleSize, y * this.particleSize, this.particleSize, this.particleSize);
         });
+
+        this.grid.changedIndexes.clear();
 
         // if (!this.primaryPointer) { //TODO replace with actor to mimic this
         //     return;
@@ -114,29 +117,62 @@ export class World extends Actor {
     }
 
     private updateGrid() {
-        this.grid.randomWalk((particle, {x, y}) => {
+        this.grid.randomWalk((particle, {i}) => {
             if (particle.empty) {
                 return;
             }
 
-            const below = y + 1;
-            if (this.grid.get(x, below)?.empty === true) {
-                this.grid.swap({x, y}, {x, y: below});
+            particle.update(this.grid);
+            if (!particle.dirty) {
                 return;
             }
 
-            const randomDirection = -1;//this.random.bool() ? -1 : 1;
-            const firstTry = x - randomDirection;
-            const secondTry = x + randomDirection;
-            if (this.grid.get(firstTry, below)?.empty === true && (this.dimensionalWraparound || firstTry >= 0 && firstTry < this.grid.width - 1)) {
-                this.grid.swap({x, y}, {x: firstTry, y: below});
-            } else if (this.grid.get(secondTry, below)?.empty === true && (this.dimensionalWraparound || secondTry >= 0 && secondTry < this.grid.width - 1)) {
-                this.grid.swap({x, y}, {x: secondTry, y: below});
-            }
+            this.grid.changedIndexes.add(i);
+            // const newIndex = this.updateParticle(x,y);
+
+            // for (let v = 0; v < particle.getUpdateCount(); v++) {
+            //     const newIndex = this.updateParticle(x,y);
+            //
+            //     // If we swapped the particle to a new location,
+            //     // we need to update our index to be that new one.
+            //     // As we are repeatedly updating the same particle.
+            //     if (newIndex !== i) {
+            //         // We can add the same index multiple times, it's a set.
+            //         this.grid.changedIndexes.add(i); // TODO Seems like we already do this right?
+            //         this.grid.changedIndexes.add(newIndex);
+            //         i = newIndex;
+            //     } else {
+            //         particle.resetVelocity();
+            //         break;
+            //     }
+            // }
         });
     }
 
-    private createParticles(pos: Vector, creator: () => Particle, radius: number = 1, probability: number = 1) {
+    // private updateParticle(x: number, y: number): number {
+    //     const below = y + 1;
+    //     if (this.grid.get(x, below)?.empty === true) {
+    //         this.grid.swap({x, y}, {x, y: below});
+    //         return this.grid.toIndex(x, below);
+    //     }
+    //
+    //     const randomDirection = -1;//this.random.bool() ? -1 : 1; // TODO not needed anymore? So remove?
+    //     const firstTry = x - randomDirection;
+    //     const secondTry = x + randomDirection;
+    //     if (this.grid.get(firstTry, below)?.empty === true && (this.dimensionalWraparound || firstTry >= 0 && firstTry < this.grid.width - 1)) {
+    //         this.grid.swap({x, y}, {x: firstTry, y: below});
+    //         return this.grid.toIndex(firstTry, below);
+    //     }
+    //
+    //     if (this.grid.get(secondTry, below)?.empty === true && (this.dimensionalWraparound || secondTry >= 0 && secondTry < this.grid.width - 1)) {
+    //         this.grid.swap({x, y}, {x: secondTry, y: below});
+    //         return this.grid.toIndex(secondTry, below);
+    //     }
+    //
+    //     return this.grid.toIndex(x,y);
+    // }
+
+    private createParticles(pos: Vector, creator: (index:number) => Particle, radius: number = 1, probability: number = 1) {
         const radiusSquared = radius * radius;
         const {x, y} = this.toGridCoordinates(pos);
         for (let dX = -radius; dX <= radius; dX++) {
@@ -149,7 +185,7 @@ export class World extends Actor {
 
                     const resultingX = x + dX;
                     if (this.dimensionalWraparound || resultingX >= 0 && resultingX < this.grid.width - 1) {
-                        this.grid.set(resultingX, resultingY, creator());
+                        this.grid.set(resultingX, resultingY, creator(this.grid.toIndex(resultingX,resultingY)));
                     }
                 }
             }
@@ -174,6 +210,5 @@ export class World extends Actor {
 
     toggleDimensionalWraparound(): void {
         this.dimensionalWraparound = !this.dimensionalWraparound;
-        console.log('TOGGLE');
     }
 }

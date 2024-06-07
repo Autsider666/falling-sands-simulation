@@ -4,6 +4,8 @@ import {World} from "./FallingSand/World.ts";
 import DynamicEventListener from "./Utility/DynamicEventListener.ts";
 import {Sand} from "./FallingSand/Particle/Sand.ts";
 import {Air} from "./FallingSand/Particle/Air.ts";
+import {Wood} from "./FallingSand/Particle/Wood.ts";
+import {Water} from "./FallingSand/Particle/Water.ts";
 
 const worldWidth = 200;
 const worldHeight = 100;
@@ -27,4 +29,6 @@ DynamicEventListener.register('button#play','click', () => world.setSimulationSp
 DynamicEventListener.register('button#pause','click', () => world.setSimulationSpeed(0));
 DynamicEventListener.register('button#toggle-wraparound','click', () => world.toggleDimensionalWraparound());
 DynamicEventListener.register('button#sand','click', () => world.setCurrentParticle(Sand));
+DynamicEventListener.register('button#wood','click', () => world.setCurrentParticle(Wood));
+DynamicEventListener.register('button#water','click', () => world.setCurrentParticle(Water));
 DynamicEventListener.register('button#air','click', () => world.setCurrentParticle(Air));

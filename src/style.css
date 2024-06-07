@@ -3,11 +3,13 @@ body {
 }
 
 #menu {
-    position: absolute;
-    top: 10px;
-    left: 10px;
+    /*position: absolute;*/
+    /*top: 10px;*/
+    /*left: 10px;*/
     color: white;
     z-index: 10;
+
+    padding-bottom: 10px;
 }
 
 #menu button {
@@ -38,4 +40,18 @@ body {
 #menu button#sand {
     background-color: #dcb159;
     color: black;
+}
+
+#menu button#wood {
+    background-color: #46281d;
+    /*color: black;*/
+}
+
+#menu button#water {
+    background-color: #1ca3ec;
+    /*color: black;*/
+}
+
+canvas {
+    border: 2px black dashed;
 }
