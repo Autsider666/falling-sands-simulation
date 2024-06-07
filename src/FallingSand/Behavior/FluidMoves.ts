@@ -1,11 +1,11 @@
 import {Array2D} from "../../Utility/Array2D.ts";
 import {Particle} from "../Particle/Particle.ts";
-import {MovesDown} from "./MovesDown.ts";
 import {Random} from "excalibur";
+import {Moves} from "./Moves.ts";
 
 const random = new Random();
 
-export class Fluid extends MovesDown {
+export class FluidMoves extends Moves {
     private lastHeight:number = 0;
     private heightCounter: number = 1;
 

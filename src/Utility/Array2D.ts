@@ -1,9 +1,9 @@
 import {Random} from "excalibur";
 import {Particle} from "../FallingSand/Particle/Particle.ts";
 
-type Coordinate = { x: number, y: number };
+// type Coordinate = { x: number, y: number };
 
-export class Array2D<I extends Particle> { //TODO fix so it's usable for everything
+export class Array2D<I extends Particle> { //FIXME so it's usable for everything
     private store: Array<I>;
     public readonly changedIndexes = new Set<number>();
     private readonly random = new Random(); //TODO replace with better solution
@@ -32,23 +32,26 @@ export class Array2D<I extends Particle> { //TODO fix so it's usable for everyth
     }
 
     set(x: number, y: number, item: I): void {
-        // if (x < 0 || x >= this.width || y < 0 || y >= this.height) { //Prevents the warping from left to right. Should probably be configurable
-        //     return;
-        // }
+        this.setIndex(y * this.width + x, item);
+    }
 
-        const index = y * this.width + x;
+    setIndex(index: number, item: I): void {
         this.store[index] = item;
         this.changedIndexes.add(index);
         item.index = index;
     }
 
-    swap(coordinateA: Coordinate, coordinateB: Coordinate): void {
-        const a = this.get(coordinateA.x, coordinateA.y);
+    // swap(coordinateA: Coordinate, coordinateB: Coordinate): void {
+    //     this.swapIndex(this.to)
+    // }
+
+    swapIndex(indexA:number,indexB:number): void {
+        const a = this.getIndex(indexA);
         if (a === undefined) {
             return;
         }
 
-        const b = this.get(coordinateB.x, coordinateB.y);
+        const b = this.getIndex(indexB);
         if (b === undefined) {
             return;
         }
@@ -57,8 +60,8 @@ export class Array2D<I extends Particle> { //TODO fix so it's usable for everyth
             return;
         }
 
-        this.set(coordinateA.x, coordinateA.y, b);
-        this.set(coordinateB.x, coordinateB.y, a);
+        this.setIndex(indexA, b);
+        this.setIndex(indexB, a);
     }
 
     forEach(callback: (item: I, data: { x: number, y: number, i: number }) => void): void {
@@ -77,15 +80,18 @@ export class Array2D<I extends Particle> { //TODO fix so it's usable for everyth
         }
     }
 
-    randomWalk(callback: (item: I, data: { x: number, y: number, i: number }) => void): void {
-        const rowCount = Math.floor(this.store.length / this.width);
-        for (let row = rowCount - 1; row >= 0; row--) {
+    randomWalk(callback: (item: I, data: { x: number, y: number, i: number }) => void, reverse:boolean = false): void {
+        for (let row = this.height - 1; row >= 0; row--) {
             const rowOffset = row * this.width;
             const leftToRight = this.random.bool();
             for (let i = 0; i < this.width; i++) {
                 // Go from right to left or left to right depending on our random value
                 const columnOffset = leftToRight ? i : -i - 1 + this.width;
-                const index = rowOffset + columnOffset;
+                let index = rowOffset + columnOffset;
+                if (reverse) {
+                    index = this.store.length - index - 1;
+                }
+
                 const {x, y} = this.toCoordinates(index);
 
                 callback(this.getIndex(index), {x, y, i});
@@ -101,5 +107,13 @@ export class Array2D<I extends Particle> { //TODO fix so it's usable for everyth
 
     toIndex(x: number, y: number): number {
         return y * this.width + x;
+    }
+
+    clearIndex(index: number) {
+        this.store[index] = this.defaultValue(index);
+    }
+
+    modifyIndexHook(index:number) {
+        return index;
     }
 }

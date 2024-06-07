@@ -11,15 +11,16 @@ type Props = {
 }
 
 export class LimitedLife extends Behavior {
-    private readonly onTick: onTick;
-    private readonly onDeath: OnDeath;
-    private remainingLife: number;
+    protected onTick: onTick;
+    protected onDeath: OnDeath;
+    public remainingLife: number;
 
     constructor(
+        owner:Particle,
         public readonly lifetime: number,
         {onTick, onDeath}: Props = {},
     ) {
-        super();
+        super(owner);
         this.remainingLife = this.lifetime;
         this.onTick = onTick ?? (() => {
         });

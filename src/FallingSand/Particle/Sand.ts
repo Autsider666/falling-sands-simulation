@@ -11,14 +11,12 @@ export class Sand extends Particle {
             index,
             Particle.varyColor(Sand.baseColor),
             {
-                behaviours: [
-                    new Moves({
-                        maxSpeed: 8,
-                        acceleration: 0.4
-                    }),
-                ]
+                maxSpeed: 8,
+                acceleration: 0.4
             }
         );
+
+        this.addBehaviour(new Moves(this));
     }
 
     get baseColor(): string {

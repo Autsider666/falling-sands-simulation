@@ -1,12 +1,6 @@
 import {Array2D} from "../../Utility/Array2D.ts";
-import {Behavior} from "./Behavior.ts";
+import {BaseBehaviourParams, Behavior} from "./Behavior.ts";
 import {Particle} from "../Particle/Particle.ts";
-
-type MovesDownProps = {
-    maxSpeed?: number,
-    acceleration?: number,
-    velocity?: number,
-}
 
 function choose<T>(array: T[], weights: number[]): T { //TODO better position
     if (array.length !== weights.length) {
@@ -24,21 +18,21 @@ function choose<T>(array: T[], weights: number[]): T { //TODO better position
     throw new Error("Shouldn't get here.");
 }
 
-export class MovesDown<Params extends Record<string, unknown> =Record<string, unknown>> extends Behavior<Params> {
-    private readonly maxSpeed: number;
-    private readonly acceleration: number;
-    protected velocity: number;
+export class MovesDown<Params extends BaseBehaviourParams = BaseBehaviourParams> extends Behavior<Params> {
+    // private readonly maxSpeed: number;
+    // private readonly acceleration: number;
+    // protected velocity: number;
 
-    constructor({maxSpeed, acceleration, velocity}: MovesDownProps) {
-        super();
-
-        this.maxSpeed = maxSpeed ?? 0;
-        this.acceleration = acceleration ?? 0;
-        this.velocity = velocity ?? 0;
-    }
+    // constructor(owner:Particle) {
+    //     super(owner);
+    //
+    //     // this.maxSpeed = maxSpeed ?? 0;
+    //     // this.acceleration = acceleration ?? 0;
+    //     // this.velocity = velocity ?? 0;
+    // }
 
     resetVelocity() {
-        this.velocity = 0;
+        this.owner.velocity = 0;
     }
 
     updateVelocity() {
@@ -48,25 +42,25 @@ export class MovesDown<Params extends Record<string, unknown> =Record<string, un
         //     newVelocity = Math.sign(newVelocity) * this.maxSpeed;
         // }
 
-        this.velocity = this.nextVelocity();
+        this.owner.velocity = this.nextVelocity();
     }
 
     nextVelocity(): number {
-        if (this.maxSpeed === 0) {
+        if (this.owner.maxSpeed === 0) {
             return 0;
         }
 
-        let newVelocity = this.velocity + this.acceleration;
+        let newVelocity = this.owner.velocity + this.owner.acceleration;
 
-        if (Math.abs(newVelocity) > this.maxSpeed) {
-            newVelocity = Math.sign(newVelocity) * this.maxSpeed;
+        if (Math.abs(newVelocity) > this.owner.maxSpeed) {
+            newVelocity = Math.sign(newVelocity) * this.owner.maxSpeed;
         }
 
         return newVelocity;
     }
 
     getUpdateCount(): number {
-        const abs = Math.abs(this.velocity);
+        const abs = Math.abs(this.owner.velocity);
         const floored = Math.floor(abs);
         const mod = abs - floored;
         // Treat a remainder (e.g. 0.5) as a random chance to update
@@ -78,7 +72,7 @@ export class MovesDown<Params extends Record<string, unknown> =Record<string, un
     }
 
     possibleMoves(grid: Array2D<Particle>, i: number): { moves: number[], weights: number[] } {
-        const nextDelta = Math.sign(this.velocity) * grid.width;
+        const nextDelta = Math.sign(this.owner.velocity) * grid.width;
         const nextVertical = i + nextDelta;
         const nextVerticalLeft = nextVertical - 1;
         const nextVerticalRight = nextVertical + 1;
@@ -122,7 +116,7 @@ export class MovesDown<Params extends Record<string, unknown> =Record<string, un
         }
 
         const choice = choose<number>(moves, weights);
-        grid.swap(grid.toCoordinates(i), grid.toCoordinates(choice));
+        grid.swapIndex(i, choice);
     }
 
     // @ts-expect-error because of current setup

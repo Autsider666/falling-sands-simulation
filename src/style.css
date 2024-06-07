@@ -1,5 +1,5 @@
 body {
-    background-color: slategray;
+    background-color: #010409;
 }
 
 #menu {
@@ -49,6 +49,16 @@ body {
 
 #menu button#water {
     background-color: #1ca3ec;
+    /*color: black;*/
+}
+
+#menu button#smoke {
+    background-color: #4C4A4D;
+    /*color: black;*/
+}
+
+#menu button#fire {
+    background-color: #e34f0f;
     /*color: black;*/
 }
 
