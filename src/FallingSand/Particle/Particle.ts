@@ -1,7 +1,6 @@
 import {Random} from "excalibur";
 
 const random = new Random();
-
 export abstract class Particle {
     protected constructor(
         public readonly color: string,
@@ -9,12 +8,14 @@ export abstract class Particle {
     ) {
     }
 
+    abstract get baseColor():string;
+
     static varyColor(color: string): string {
         const {h, s, l} = this.toHSL(color);
-        const hue = Math.floor(h*360);
-        let saturation = (s*100) + random.integer(-20, 0);
+        const hue = Math.floor(h * 360);
+        let saturation = (s * 100) + random.integer(-20, 0);
         saturation = Math.max(0, Math.min(100, saturation));
-        let lightness = (l*100) + random.integer(-10, 10);
+        let lightness = (l * 100) + random.integer(-10, 10);
         lightness = Math.max(0, Math.min(100, lightness));
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     }
