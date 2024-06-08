@@ -62,7 +62,7 @@ export class Flammable extends LimitedLife {
         };
     }
 
-    step(particle:Particle, grid:Array2D<Particle>):void {
+    updateStep(particle:Particle, grid:Array2D<Particle>):void {
         // If it's not burning, do nothing
         if (!this.burning) { return; }
         const index = particle.index;
@@ -113,6 +113,6 @@ export class Flammable extends LimitedLife {
             this.burning = false;
         }
 
-        this.step(particle, grid);
+        this.updateStep(particle, grid);
     }
 }

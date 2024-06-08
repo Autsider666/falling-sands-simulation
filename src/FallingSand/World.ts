@@ -87,7 +87,7 @@ export class World extends Actor {
             this.cleared = false;
         }
 
-        this.grid.changedIndexes.forEach(index => {
+        for(const index of this.grid.changedIndexes) {
             const particle = this.grid.getIndex(index);
 
             const {x, y} = this.grid.toCoordinates(index);
@@ -99,7 +99,7 @@ export class World extends Actor {
             ctx.fillStyle = particle.color;
 
             ctx.fillRect(x * this.particleSize, y * this.particleSize, this.particleSize, this.particleSize);
-        });
+        }
 
         this.grid.changedIndexes.clear();
 

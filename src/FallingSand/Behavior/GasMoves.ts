@@ -2,6 +2,7 @@ import {Moves} from "./Moves.ts";
 import {Particle} from "../Particle/Particle.ts";
 import {Array2D} from "../../Utility/Array2D.ts";
 
+//TODO remove when horizontal velocity is a thing
 export class GasMoves extends Moves {
     // canPassThrough(particle:Particle) {
     //     return particle?.empty ?? false;

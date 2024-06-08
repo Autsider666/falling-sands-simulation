@@ -7,7 +7,6 @@ const random = new Random();
 
 type ParticleProps = {
     density?: number,
-    airy?: boolean,
     behaviors?: Behavior[],
     maxSpeed?: number,
     acceleration?: number,
@@ -16,7 +15,6 @@ type ParticleProps = {
 
 export abstract class Particle {
     public readonly density: number;
-    public readonly airy: boolean;
     private readonly behaviors: Map<Constructor<Behavior>, Behavior>;
     public dirty: boolean = false;
 
@@ -27,10 +25,9 @@ export abstract class Particle {
     protected constructor(
         private currentIndex: number,
         public color: string,
-        {density, behaviors, airy, maxSpeed, acceleration, velocity}: ParticleProps = {},
+        {density, behaviors, maxSpeed, acceleration, velocity}: ParticleProps = {},
     ) {
         this.density = density ?? 0;
-        this.airy = airy ?? false;
         this.maxSpeed = maxSpeed ?? 0;
         this.acceleration = acceleration ?? 0;
         this.velocity = velocity ?? 0;
@@ -38,11 +35,11 @@ export abstract class Particle {
         this.addBehaviors(behaviors ?? []);
     }
 
-    get index():number {
+    get index(): number {
         return this.currentIndex;
     }
 
-    set index(index:number) {
+    set index(index: number) {
         this.currentIndex = index;
     }
 
@@ -57,9 +54,9 @@ export abstract class Particle {
     }
 
     update(grid: Array2D<Particle>, params: BaseBehaviourParams) {
-        this.behaviors.forEach(
-            behaviour => behaviour.update(this, grid, params)
-        );
+        for (const behavior of this.behaviors.values()) {
+            behavior.update(this, grid, params);
+        }
 
         if (!this.dirty) {
             return;

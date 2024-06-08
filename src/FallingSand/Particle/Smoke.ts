@@ -24,7 +24,6 @@ export class Smoke extends Particle {
         );
 
         super(index, color, {
-            airy: true,
             maxSpeed: 0.25,
             acceleration: -0.05,
             density: 1,
@@ -54,7 +53,7 @@ export class Smoke extends Particle {
                     }
                 }
             ),
-            new GasMoves(this),
+            new GasMoves(this), // Could be just Moves if horizontal movement is taken into account
         ]);
 
         // FIXME the fuck is happening here?
