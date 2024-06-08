@@ -1,9 +1,17 @@
 import {Random} from "excalibur";
+import {ColorVariance} from "../../Elements.ts";
 import {BaseBehaviourParams, Behavior} from "../Behavior/Behavior.ts";
 import {Array2D} from "../../Utility/Array2D.ts";
 import {Constructor} from "../../Utility/Type.ts";
 
 const random = new Random();
+const randomByConfig = ({value, min, max}: { value?: number, min?: number, max?: number }): number => {
+    if (value !== undefined) {
+        return value;
+    }
+
+    return random.integer(min ?? 0, max ?? 0);
+};
 
 type ParticleProps = {
     density?: number,
@@ -14,6 +22,7 @@ type ParticleProps = {
 }
 
 export abstract class Particle {
+    static test: string;
     public readonly density: number;
     private readonly behaviors: Map<Constructor<Behavior>, Behavior>;
     public dirty: boolean = false;
@@ -72,19 +81,15 @@ export abstract class Particle {
     }
 
     static varyColor(color: string, {
-        hueModifier = () => 0,
-        saturationModifier = () => random.integer(-20, 0),
-        lightnessModifier = () => random.integer(-10, 10), //TODO Switch to min/max config
-    }: {
-        hueModifier?: () => number,
-        saturationModifier?: () => number,
-        lightnessModifier?: () => number
-    } = {}): string { //TODO move
+        hue: hueModifier = {value: 0},
+        saturation: saturationModifier = {min: -20, max: 0},
+        lightness: lightnessModifier = {min: -10, max: 0}, //TODO Switch to min/max config
+    }: ColorVariance = {}): string { //TODO move
         const {h, s, l, a} = this.toHSLA(color);
-        const hue = Math.floor(h * 360) + hueModifier();
-        let saturation = (s * 100) + saturationModifier();
+        const hue = Math.floor(h * 360) + randomByConfig(hueModifier);
+        let saturation = (s * 100) + randomByConfig(saturationModifier);
         saturation = Math.max(0, Math.min(100, saturation));
-        let lightness = (l * 100) + lightnessModifier();
+        let lightness = (l * 100) + randomByConfig(lightnessModifier);
         lightness = Math.max(0, Math.min(100, lightness));
         return `hsla(${hue}, ${saturation}%, ${lightness}%, ${a.toFixed(1)})`;
     }

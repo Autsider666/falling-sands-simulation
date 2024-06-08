@@ -24,7 +24,8 @@ export class LimitedLife extends Behavior {
         this.remainingLife = this.lifetime;
         this.onTick = onTick ?? (() => {
         });
-        this.onDeath = onDeath ?? (() => {
+        this.onDeath = onDeath ?? ((_, particle, grid) => {
+            grid.clearIndex(particle.index);
         });
     }
 

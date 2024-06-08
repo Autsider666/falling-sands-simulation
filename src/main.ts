@@ -1,13 +1,8 @@
 import './style.css';
 import {Color, Engine} from "excalibur";
+import {ElementIdentifier, Elements} from "./Elements.ts";
 import {World} from "./FallingSand/World.ts";
 import DynamicEventListener from "./Utility/DynamicEventListener.ts";
-import {Sand} from "./FallingSand/Particle/Sand.ts";
-import {Air} from "./FallingSand/Particle/Air.ts";
-import {Wood} from "./FallingSand/Particle/Wood.ts";
-import {Water} from "./FallingSand/Particle/Water.ts";
-import {Smoke} from "./FallingSand/Particle/Smoke.ts";
-import {Fire} from "./FallingSand/Particle/Fire.ts";
 
 const worldWidth = 350;
 const worldHeight = 250;
@@ -22,17 +17,51 @@ const game = new Engine({
 
 await game.start();
 
-const world = new World(worldHeight, worldWidth, particleSize);
+let selectedElement: ElementIdentifier = 'Sand';
+const elementButtons = new Map<ElementIdentifier, HTMLButtonElement>();
+
+function setActiveElement(name: ElementIdentifier, force: boolean = false): void {
+    if (name === selectedElement && !force) {
+        return;
+    }
+
+    elementButtons.get(selectedElement)?.classList.remove('active');
+    elementButtons.get(name)?.classList.add('active');
+    selectedElement = name;
+
+    world.setCurrentParticle(name);
+}
+
+const world = new World(worldHeight, worldWidth, particleSize, selectedElement);
 
 game.add(world);
 
-DynamicEventListener.register('button#clear','click', () => world.clear());
-DynamicEventListener.register('button#play','click', () => world.setSimulationSpeed(1));
-DynamicEventListener.register('button#pause','click', () => world.setSimulationSpeed(0));
-DynamicEventListener.register('button#toggle-wraparound','click', () => world.toggleDimensionalWraparound());
-DynamicEventListener.register('button#sand','click', () => world.setCurrentParticle(Sand));
-DynamicEventListener.register('button#wood','click', () => world.setCurrentParticle(Wood));
-DynamicEventListener.register('button#water','click', () => world.setCurrentParticle(Water));
-DynamicEventListener.register('button#smoke','click', () => world.setCurrentParticle(Smoke));
-DynamicEventListener.register('button#fire','click', () => world.setCurrentParticle(Fire));
-DynamicEventListener.register('button#air','click', () => world.setCurrentParticle(Air));
+const menu = document.getElementById('menu');
+if (!menu) {
+    throw new Error('Why no menu?');
+}
+
+for (const name of Object.keys(Elements) as ElementIdentifier[]) {
+    const {color, canDraw} = Elements[name];
+    if (canDraw === false) {
+        continue;
+    }
+
+    const button = document.createElement<'button'>('button', {});
+    button.innerText = name;
+    button.id = name;
+    button.style.background = color;
+
+    menu.append(button);
+
+    elementButtons.set(name, button);
+
+    DynamicEventListener.register(`button#${name}`, 'click', () => setActiveElement(name));
+}
+
+setActiveElement(selectedElement, true);
+
+DynamicEventListener.register('button#clear', 'click', () => world.clear());
+DynamicEventListener.register('button#play', 'click', () => world.setSimulationSpeed(1));
+DynamicEventListener.register('button#pause', 'click', () => world.setSimulationSpeed(0));
+DynamicEventListener.register('button#toggle-wraparound', 'click', () => world.toggleDimensionalWraparound());

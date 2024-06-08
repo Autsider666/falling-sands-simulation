@@ -20,47 +20,50 @@ body {
     line-height: 1.5;
     text-align: center;
     background-color: transparent;
-    border: 1px solid transparent;
+    border: 3px solid transparent;
     padding: 6px 12px;
     font-size: 1rem;
     border-radius: .25rem;
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     /* color: #0d6efd; */
-    border-color: #0d6efd;
+    /*border-color: #0d6efd;*/
     color: white;
-    border-color: white;
+    /*border-color: white;*/
+
+    margin: 2px;
 }
 
-#menu button:hover {
+#menu button:hover, #menu button.active {
     color: #fff;
     background-color: #0d6efd;
-    border-color: #0d6efd;
+    /*border-color: #0d6efd;*/
+    border-color: #fff;
 }
 
-#menu button#sand {
-    background-color: #dcb159;
-    color: black;
-}
+/*#menu button#sand {*/
+/*    background-color: #dcb159;*/
+/*    color: black;*/
+/*}*/
 
-#menu button#wood {
-    background-color: #46281d;
-    /*color: black;*/
-}
+/*#menu button#wood {*/
+/*    background-color: #46281d;*/
+/*    !*color: black;*!*/
+/*}*/
 
-#menu button#water {
-    background-color: #1ca3ec;
-    /*color: black;*/
-}
+/*#menu button#water {*/
+/*    background-color: #1ca3ec;*/
+/*    !*color: black;*!*/
+/*}*/
 
-#menu button#smoke {
-    background-color: #4C4A4D;
-    /*color: black;*/
-}
+/*#menu button#smoke {*/
+/*    background-color: #4C4A4D;*/
+/*    !*color: black;*!*/
+/*}*/
 
-#menu button#fire {
-    background-color: #e34f0f;
-    /*color: black;*/
-}
+/*#menu button#fire {*/
+/*    background-color: #e34f0f;*/
+/*    !*color: black;*!*/
+/*}*/
 
 canvas {
     border: 2px black dashed;

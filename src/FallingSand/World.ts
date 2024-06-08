@@ -1,9 +1,9 @@
+import {ElementIdentifier} from "../Elements.ts";
+import {Element} from "./Particle/Element.ts";
 import {Particle} from "./Particle/Particle.ts";
 import {Array2D} from "../Utility/Array2D.ts";
 import {Air} from "./Particle/Air.ts";
 import {Actor, Canvas, Engine, PointerAbstraction, Random, Vector} from "excalibur";
-import {Sand} from "./Particle/Sand.ts";
-import {Constructor} from "../Utility/Type.ts";
 import {DirtyCanvas} from "../Utility/DirtyCanvas.ts";
 
 export class World extends Actor {
@@ -11,8 +11,6 @@ export class World extends Actor {
     private readonly canvas: Canvas;
     private readonly random = new Random();
     private primaryPointer?: PointerAbstraction;
-
-    private currentParticleType: Constructor<Particle> = Sand;
 
     private drawRadius: number = 3;
 
@@ -26,6 +24,7 @@ export class World extends Actor {
         gridHeight: number,
         gridWidth: number,
         private readonly particleSize: number,
+        private currentParticleType: ElementIdentifier,
         private dimensionalWraparound: boolean = false,
     ) {
         super({
@@ -61,7 +60,7 @@ export class World extends Actor {
         if (this.isDrawing) {
             this.createParticles(
                 this.primaryPointer.lastWorldPos,
-                (index: number) => new this.currentParticleType(index),
+                (index: number) => Element.create(index, this.currentParticleType),
                 this.drawRadius,
                 0.5,
             );
@@ -76,8 +75,8 @@ export class World extends Actor {
         }
     }
 
-    public setCurrentParticle(particleCreator: Constructor<Particle>): void {
-        this.currentParticleType = particleCreator;
+    public setCurrentParticle(element: ElementIdentifier): void {
+        this.currentParticleType = element;
     }
 
     private drawCanvas(ctx: CanvasRenderingContext2D): void {
@@ -87,14 +86,10 @@ export class World extends Actor {
             this.cleared = false;
         }
 
-        for(const index of this.grid.changedIndexes) {
+        for (const index of this.grid.changedIndexes) {
             const particle = this.grid.getIndex(index);
 
             const {x, y} = this.grid.toCoordinates(index);
-            // this.grid.forEach((particle,{x,y}) => {
-            // if (particle instanceof Air) { //TODO check if this is maybe better
-            //     return;
-            // }
 
             ctx.fillStyle = particle.color;
 

@@ -11,7 +11,7 @@ export class Wood extends Particle {
         this.addBehaviour(new Flammable(this, {
             fuel: 200 + 100 * (Math.random()),
             chanceToSpread: (behavior) => behavior.remainingLife / behavior.lifetime,
-            chanceToCatch: 0.005,
+            chanceToIgnite: 0.005,
             color: Wood.baseColor,
         }));
     }

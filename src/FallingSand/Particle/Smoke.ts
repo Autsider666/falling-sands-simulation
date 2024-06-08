@@ -1,25 +1,23 @@
+import {HexColor} from "../../Elements.ts";
 import {Particle} from "./Particle.ts";
 import {LimitedLife} from "../Behavior/LimitedLife.ts";
 import {Flammable} from "../Behavior/Flamable.ts";
-import {Random} from "excalibur";
 import {GasMoves} from "../Behavior/GasMoves.ts";
 
 type SmokeProps = {
     burning?: boolean
 }
 
-const random = new Random();//TODO should really be handled in another way
-
 export class Smoke extends Particle {
-    static baseColor = "#4C4A4D"; //FIXME this intermingles too much with the converted colors
+    static baseColor:HexColor = "#4C4A4D"; //FIXME this intermingles too much with the converted colors
     static addProbability = 0.25;
 
     constructor(index: number, {burning}: SmokeProps = {}) {
         const life = 400 + 400 * (Math.random());
         const color = Particle.varyColor(
             Smoke.baseColor, {
-                lightnessModifier: () => random.integer(-5, 5),
-                saturationModifier: () => random.integer(-5, 0)
+                lightness: {min: -5, max: 5},
+                saturation: {min: -5, max: 0},
             }
         );
 
@@ -48,12 +46,12 @@ export class Smoke extends Particle {
                         // TODO handle alpha
                         // particle.color.setAlpha(Math.floor(255.0 * behavior.remainingLife / behavior.lifetime));
                     },
-                    onDeath: (_, particle, grid) => {
-                        grid.clearIndex(particle.index);
-                    }
+                    // onDeath: (_, particle, grid) => {
+                    //     grid.clearIndex(particle.index);
+                    // }
                 }
             ),
-            new GasMoves(this), // Could be just Moves if horizontal movement is taken into account
+            new GasMoves(this), // FIXME Could be just Moves if horizontal movement is taken into account
         ]);
 
         // FIXME the fuck is happening here?

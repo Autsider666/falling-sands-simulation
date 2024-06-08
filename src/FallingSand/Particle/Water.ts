@@ -7,7 +7,7 @@ export class Water extends Particle {
 
     constructor(index: number) {
         super(index,
-            Particle.varyColor(Water.baseColor,{lightnessModifier:()=> 0}),
+            Particle.varyColor(Water.baseColor, {lightness: {value: 0}}),
             {
                 maxSpeed: 8,
                 acceleration: 0.4,
