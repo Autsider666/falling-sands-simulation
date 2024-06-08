@@ -1,9 +1,9 @@
+import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
 import {Behavior} from "./Behavior";
 import {Particle} from "../Particle/Particle.ts";
-import {Array2D} from "../../Utility/Array2D.ts";
 
 type onTick = (behavior: LimitedLife, particle: Particle) => void
-type OnDeath = (behavior: LimitedLife, particle: Particle, grid: Array2D<Particle>) => void
+type OnDeath = (behavior: LimitedLife, particle: Particle, matrix: CellularMatrix) => void
 
 type Props = {
     onTick?: onTick,
@@ -24,19 +24,19 @@ export class LimitedLife extends Behavior {
         this.remainingLife = this.lifetime;
         this.onTick = onTick ?? (() => {
         });
-        this.onDeath = onDeath ?? ((_, particle, grid) => {
-            grid.clearIndex(particle.index);
+        this.onDeath = onDeath ?? ((_, particle, matrix) => {
+            matrix.clearIndex(particle.index);
         });
     }
 
-    update(particle: Particle, grid: Array2D<Particle>): void {
+    update(particle: Particle, matrix: CellularMatrix): void {
         if (this.remainingLife <= 0) {
-            this.onDeath(this, particle, grid);
+            this.onDeath(this, particle, matrix);
         } else {
             this.remainingLife = Math.floor(this.remainingLife - 1);
         }
 
         this.onTick(this, particle);
-        grid.changedIndexes.add(particle.index);
+        matrix.changedIndexes.add(particle.index);
     }
 }

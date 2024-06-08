@@ -1,5 +1,4 @@
-import {Array2D} from "../../Utility/Array2D.ts";
-import {Particle} from "../Particle/Particle.ts";
+import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
 import {Random} from "excalibur";
 import {Moves} from "./Moves.ts";
 
@@ -9,12 +8,12 @@ export class FluidMoves extends Moves {
     private lastHeight:number = 0;
     private heightCounter: number = 1;
 
-    possibleMoves(grid: Array2D<Particle>, i: number): { moves: number[]; weights: number[] } {
-        const result =  super.possibleMoves(grid, i);
+    possibleMoves(matrix: CellularMatrix, i: number): { moves: number[]; weights: number[] } {
+        const result =  super.possibleMoves(matrix, i);
 
         if(result.weights.length === 0) {
             const dir =random.integer(1,5);
-            const {y} = grid.toCoordinates(i);
+            const {y} = matrix.toCoordinates(i);
 
             if (this.lastHeight !== y) {
                 this.lastHeight = y;
@@ -26,11 +25,11 @@ export class FluidMoves extends Moves {
             let leftBlocked = false;
             let rightBlocked = false;
 
-            const column = i % grid.width;
+            const column = i % matrix.width;
             for (let j = 1; j < dir; j++) {
                 const nextHorizontalLeft = i - j;
                 const nextHorizontalRight = i + j;
-                if (!leftBlocked && this.canPassThrough(grid.getIndex(nextHorizontalLeft)) && nextHorizontalLeft % grid.width < column) {
+                if (!leftBlocked && this.canPassThrough(matrix.getIndex(nextHorizontalLeft)) && nextHorizontalLeft % matrix.width < column) {
                     result.moves.push(nextHorizontalLeft);
                     result.weights.push(1);
                 } else {
@@ -38,7 +37,7 @@ export class FluidMoves extends Moves {
                 }
 
                 // Check to make sure belowRight didn't wrap to the next line
-                if (!rightBlocked && this.canPassThrough(grid.getIndex(nextHorizontalRight)) && nextHorizontalRight % grid.width > column) {
+                if (!rightBlocked && this.canPassThrough(matrix.getIndex(nextHorizontalRight)) && nextHorizontalRight % matrix.width > column) {
                     result.moves.push(nextHorizontalRight);
                     result.weights.push(1);
                 } else {

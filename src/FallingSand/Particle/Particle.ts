@@ -1,7 +1,7 @@
 import {Random} from "excalibur";
+import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
 import {ColorVariance} from "../../Elements.ts";
 import {BaseBehaviourParams, Behavior} from "../Behavior/Behavior.ts";
-import {Array2D} from "../../Utility/Array2D.ts";
 import {Constructor} from "../../Utility/Type.ts";
 
 const random = new Random();
@@ -62,16 +62,16 @@ export abstract class Particle {
         behaviors.forEach(behavior => this.addBehaviour(behavior));
     }
 
-    update(grid: Array2D<Particle>, params: BaseBehaviourParams) {
+    update(matrix: CellularMatrix, params: BaseBehaviourParams) {
         for (const behavior of this.behaviors.values()) {
-            behavior.update(this, grid, params);
+            behavior.update(this, matrix, params);
         }
 
         if (!this.dirty) {
             return;
         }
 
-        grid.changedIndexes.add(this.index);
+        matrix.changedIndexes.add(this.index);
         this.dirty = false;
     }
 

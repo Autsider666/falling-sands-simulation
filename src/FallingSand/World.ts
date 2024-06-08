@@ -1,13 +1,13 @@
+import {CellularMatrix} from "../Cellular/CellularMatrix.ts";
 import {ElementIdentifier} from "../Elements.ts";
 import {Element} from "./Particle/Element.ts";
 import {Particle} from "./Particle/Particle.ts";
-import {Array2D} from "../Utility/Array2D.ts";
 import {Air} from "./Particle/Air.ts";
 import {Actor, Canvas, Engine, PointerAbstraction, Random, Vector} from "excalibur";
 import {DirtyCanvas} from "../Utility/DirtyCanvas.ts";
 
 export class World extends Actor {
-    private readonly grid: Array2D<Particle>;
+    private readonly matrix: CellularMatrix;
     private readonly canvas: Canvas;
     private readonly random = new Random();
     private primaryPointer?: PointerAbstraction;
@@ -32,11 +32,9 @@ export class World extends Actor {
             width: gridWidth * particleSize,
             anchor: Vector.Zero,
         });
-        this.grid = new Array2D<Particle>(
+        this.matrix = new CellularMatrix(
             gridHeight,
             gridWidth,
-            (index: number) => new Air(index),
-            (a, b) => !a && !b, //FIXME used to be a.empty && b.empty
         );
 
         this.canvas = new DirtyCanvas({
@@ -66,7 +64,7 @@ export class World extends Actor {
             );
         }
 
-        if (this.cleared || this.grid.changedIndexes.size) {
+        if (this.cleared || this.matrix.changedIndexes.size) {
             this.canvas.flagDirty();
         }
 
@@ -86,17 +84,17 @@ export class World extends Actor {
             this.cleared = false;
         }
 
-        for (const index of this.grid.changedIndexes) {
-            const particle = this.grid.getIndex(index);
+        for (const index of this.matrix.changedIndexes) {
+            const particle = this.matrix.getIndex(index);
 
-            const {x, y} = this.grid.toCoordinates(index);
+            const {x, y} = this.matrix.toCoordinates(index);
 
-            ctx.fillStyle = particle.color;
+            ctx.fillStyle = particle ? particle.color : Air.baseColor;
 
             ctx.fillRect(x * this.particleSize, y * this.particleSize, this.particleSize, this.particleSize);
         }
 
-        this.grid.changedIndexes.clear();
+        this.matrix.changedIndexes.clear();
 
         // if (!this.primaryPointer) { //TODO replace with actor to mimic this
         //     return;
@@ -118,8 +116,10 @@ export class World extends Actor {
 
     private updateGrid() {
         [-1, 1].forEach(direction => {
-            this.grid.randomWalk((particle) => {
-                particle.update(this.grid, {direction});
+            this.matrix.randomWalk((particle) => {
+                if (particle){
+                    particle.update(this.matrix, {direction});
+                }
             }, direction < 0);
         });
     }
@@ -131,13 +131,13 @@ export class World extends Actor {
             for (let dY = -radius; dY <= radius; dY++) {
                 if (dX * dX + dY * dY <= radiusSquared && this.random.bool(probability)) {
                     const resultingY = y + dY;
-                    if (resultingY < 0 || resultingY >= this.grid.height - 1) {
+                    if (resultingY < 0 || resultingY >= this.matrix.height - 1) {
                         continue;
                     }
 
                     const resultingX = x + dX;
-                    if (this.dimensionalWraparound || resultingX >= 0 && resultingX < this.grid.width - 1) {
-                        this.grid.set(resultingX, resultingY, creator(this.grid.toIndex(resultingX, resultingY)));
+                    if (this.dimensionalWraparound || resultingX >= 0 && resultingX < this.matrix.width - 1) {
+                        this.matrix.set(resultingX, resultingY, creator(this.matrix.toIndex(resultingX, resultingY)));
                     }
                 }
             }
@@ -152,7 +152,7 @@ export class World extends Actor {
     }
 
     clear() {
-        this.grid.clear();
+        this.matrix.clear();
         this.cleared = true;
     }
 

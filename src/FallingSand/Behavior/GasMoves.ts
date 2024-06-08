@@ -1,6 +1,5 @@
+import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
 import {Moves} from "./Moves.ts";
-import {Particle} from "../Particle/Particle.ts";
-import {Array2D} from "../../Utility/Array2D.ts";
 
 //TODO remove when horizontal velocity is a thing
 export class GasMoves extends Moves {
@@ -8,10 +7,10 @@ export class GasMoves extends Moves {
     //     return particle?.empty ?? false;
     // }
 
-    possibleMoves(grid:Array2D<Particle>, i:number) {
-        const nextDelta = Math.sign(this.owner.velocity) * grid.width;
+    possibleMoves(matrix:CellularMatrix, i:number) {
+        const nextDelta = Math.sign(this.owner.velocity) * matrix.width;
         const nextVertical = i + nextDelta;
-        const column = nextVertical % grid.width;
+        const column = nextVertical % matrix.width;
 
         const nextVerticalLeft = nextVertical - 1;
         const nextVerticalRight = nextVertical + 1;
@@ -22,32 +21,32 @@ export class GasMoves extends Moves {
         const moves = [];
         const weights = [];
 
-        if (this.canPassThrough(grid.getIndex(nextVertical))) {
+        if (this.canPassThrough(matrix.getIndex(nextVertical))) {
             moves.push(nextVertical);
             weights.push(2);
         }
 
         // Check to make sure belowLeft didn't wrap to the next line
-        if (this.canPassThrough(grid.getIndex(nextVerticalLeft)) && nextVerticalLeft % grid.width < column) {
+        if (this.canPassThrough(matrix.getIndex(nextVerticalLeft)) && nextVerticalLeft % matrix.width < column) {
             moves.push(nextVerticalLeft);
             weights.push(1);
         }
 
         // Check to make sure belowRight didn't wrap to the next line
-        if (this.canPassThrough(grid.getIndex(nextVerticalRight)) && nextVerticalRight % grid.width > column) {
+        if (this.canPassThrough(matrix.getIndex(nextVerticalRight)) && nextVerticalRight % matrix.width > column) {
             moves.push(nextVerticalRight);
             weights.push(1);
         }
 
         // if (!this.burning) { //TODO this does not have burning right?
             // Check to make sure belowLeft didn't wrap to the next line
-            if (this.canPassThrough(grid.getIndex(nextLeft)) && nextLeft % grid.width < column) {
+            if (this.canPassThrough(matrix.getIndex(nextLeft)) && nextLeft % matrix.width < column) {
                 moves.push(nextLeft);
                 weights.push(1);
             }
 
             // Check to make sure belowRight didn't wrap to the next line
-            if (this.canPassThrough(grid.getIndex(nextRight)) && nextRight % grid.width > column) {
+            if (this.canPassThrough(matrix.getIndex(nextRight)) && nextRight % matrix.width > column) {
                 moves.push(nextRight);
                 weights.push(1);
             }

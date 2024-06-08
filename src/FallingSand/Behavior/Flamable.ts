@@ -1,7 +1,7 @@
+import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
 import {LimitedLife} from "./LimitedLife.ts";
 import {Particle} from "../Particle/Particle.ts";
 import {Element} from "../Particle/Element.ts";
-import {Array2D} from "../../Utility/Array2D.ts";
 
 type FlammableProps = {
     fuel?: number,
@@ -63,22 +63,22 @@ export class Flammable extends LimitedLife {
         };
     }
 
-    updateStep(particle: Particle, grid: Array2D<Particle>): void {
+    updateStep(particle: Particle, matrix: CellularMatrix): void {
         // If it's not burning, do nothing
         if (!this.burning) {
             return;
         }
         const index = particle.index;
 
-        const column = index % grid.width;
+        const column = index % matrix.width;
         const candidates = [];
         // Each of the 8 directions
         for (let dX = -1; dX <= 1; dX++) {
             for (let dY = -1; dY <= 1; dY++) {
-                const dI = index + dX + dY * grid.width;
-                const x = dI % grid.width;
-                // Make sure it's in our grid
-                const inBounds = dI >= 0 && dI < (grid.height * grid.height);
+                const dI = index + dX + dY * matrix.width;
+                const x = dI % matrix.width;
+                // Make sure it's in our matrix
+                const inBounds = dI >= 0 && dI < (matrix.height * matrix.height);
                 // Make sure we didn't wrap to the next or previous row
                 const noWrap = Math.abs(x - column) <= 1;
                 if (inBounds && noWrap) {
@@ -87,16 +87,20 @@ export class Flammable extends LimitedLife {
             }
         }
 
-        candidates.forEach((i) => {
-            const candidateParticle = grid.getIndex(i);
+        for (const i of candidates) {
+            const candidateParticle = matrix.getIndex(i);
+            if (!candidateParticle) {
+                continue;
+            }
+
             const flammable = candidateParticle.getBehavior(Flammable);
             if (flammable) {
                 flammable.chancesToCatch += 0.5 + Math.random() * 0.5;
             }
-        });
+        }
     }
 
-    update(particle: Particle, grid: Array2D<Particle>) {
+    update(particle: Particle, matrix: CellularMatrix) {
         if (this.chancesToCatch > 0 && !this.burning) {
             if (Math.random() < this.chanceToSpread(this) * (this.chancesToCatch * this.chanceToIgnite)) {
                 this.burning = true;
@@ -104,10 +108,10 @@ export class Flammable extends LimitedLife {
             this.chancesToCatch = 0;
         }
         if (this.burning) {
-            super.update(particle, grid);
+            super.update(particle, matrix);
         } else if (this.remainingLife < this.lifetime) {
             if (particle.color !== this.burntColor) {
-                grid.changedIndexes.add(particle.index);
+                matrix.changedIndexes.add(particle.index);
             }
             particle.color = this.burntColor;
         }
@@ -116,6 +120,6 @@ export class Flammable extends LimitedLife {
             this.burning = false;
         }
 
-        this.updateStep(particle, grid);
+        this.updateStep(particle, matrix);
     }
 }

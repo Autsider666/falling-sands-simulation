@@ -1,4 +1,4 @@
-import {Array2D} from "../../Utility/Array2D.ts";
+import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
 import {BaseBehaviourParams, Behavior} from "./Behavior.ts";
 import {Particle} from "../Particle/Particle.ts";
 
@@ -56,32 +56,32 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
     }
 
     canPassThrough(particle: Particle|undefined): boolean {
-        return particle !== undefined && particle.density < this.owner.density;
+        return !particle || particle.density < this.owner.density;
     }
 
-    possibleMoves(grid: Array2D<Particle>, i: number): { moves: number[], weights: number[] } {
-        const nextDelta = Math.sign(this.owner.velocity) * grid.width;
+    possibleMoves(matrix: CellularMatrix, i: number): { moves: number[], weights: number[] } {
+        const nextDelta = Math.sign(this.owner.velocity) * matrix.width;
         const nextVertical = i + nextDelta;
         const nextVerticalLeft = nextVertical - 1;
         const nextVerticalRight = nextVertical + 1;
 
-        const column = nextVertical % grid.width;
+        const column = nextVertical % matrix.width;
 
         const moves = [];
         const weights = [];
 
-        if (this.canPassThrough(grid.getIndex(nextVertical))) {
+        if (this.canPassThrough(matrix.getIndex(nextVertical))) {
             moves.push(nextVertical);
             weights.push(2);
         } else {
             // Check to make sure belowLeft didn't wrap to the next line
-            if (this.canPassThrough(grid.getIndex(nextVerticalLeft)) && nextVerticalLeft % grid.width < column) {
+            if (this.canPassThrough(matrix.getIndex(nextVerticalLeft)) && nextVerticalLeft % matrix.width < column) {
                 moves.push(nextVerticalLeft);
                 weights.push(1);
             }
 
             // Check to make sure belowRight didn't wrap to the next line
-            if (this.canPassThrough(grid.getIndex(nextVerticalRight)) && nextVerticalRight % grid.width > column) {
+            if (this.canPassThrough(matrix.getIndex(nextVerticalRight)) && nextVerticalRight % matrix.width > column) {
                 moves.push(nextVerticalRight);
                 weights.push(1);
             }
@@ -90,29 +90,29 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
         return {moves, weights};
     }
 
-    updateStep(particle: Particle, grid: Array2D<Particle>): void {
+    updateStep(particle: Particle, matrix: CellularMatrix): void {
         const i = particle.index;
-        // if (grid.getIndex(i)?.empty !== false) {
+        // if (matrix.getIndex(i)?.empty !== false) {
         if (particle.density === 0) {
             this.resetVelocity();
             return;
         }
 
-        const {moves, weights} = this.possibleMoves(grid, i);
+        const {moves, weights} = this.possibleMoves(matrix, i);
         if (!moves.length) {
             this.resetVelocity();
             return;
         }
 
         const choice = choose<number>(moves, weights);
-        grid.swapIndex(i, choice);
+        matrix.swapIndex(i, choice);
     }
 
     shouldUpdate({direction}: { direction?: number }) {
         // direction = direction ?? 1;
         return direction === Math.sign(this.nextVelocity());
     }
-    update(particle: Particle, grid: Array2D<Particle>, params: Params): void {
+    update(particle: Particle, matrix: CellularMatrix, params: Params): void {
         if (!this.shouldUpdate(params)) {
             return;
         }
@@ -125,7 +125,7 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
 
         // Update the number of times the particle instructs us to
         for (let v = 0; v < updateCount; v++) {
-            this.updateStep(particle, grid);
+            this.updateStep(particle, matrix);
             const newIndex = particle.index;
 
             // If we swapped the particle to a new location,
@@ -133,8 +133,8 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
             // As we are repeatedly updating the same this.
             if (newIndex !== index) {
                 // We can add the same index multiple times, it's a set.
-                grid.changedIndexes.add(index);
-                grid.changedIndexes.add(newIndex);
+                matrix.changedIndexes.add(index);
+                matrix.changedIndexes.add(newIndex);
                 // modified = true;
             } else {
                 this.resetVelocity();
@@ -145,7 +145,7 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
         }
 
         if (updateCount === 0) {
-            grid.changedIndexes.add(index);
+            matrix.changedIndexes.add(index);
         }
     }
 
