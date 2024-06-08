@@ -27,7 +27,7 @@ export class Array2D<I extends Particle> { //FIXME so it's usable for everything
         return this.store[y * this.width + x];
     }
 
-    getIndex(index: number) {
+    getIndex(index: number) { //FIXME can be undefined
         return this.store[index];
     }
 

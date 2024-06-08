@@ -3,9 +3,9 @@ import {Particle} from "../Particle/Particle.ts";
 import {Array2D} from "../../Utility/Array2D.ts";
 
 export class GasMoves extends Moves {
-    canPassThrough(particle:Particle) {
-        return particle?.empty ?? false;
-    }
+    // canPassThrough(particle:Particle) {
+    //     return particle?.empty ?? false;
+    // }
 
     possibleMoves(grid:Array2D<Particle>, i:number) {
         const nextDelta = Math.sign(this.owner.velocity) * grid.width;

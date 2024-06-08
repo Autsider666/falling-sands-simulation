@@ -6,7 +6,7 @@ import {Constructor} from "../../Utility/Type.ts";
 const random = new Random();
 
 type ParticleProps = {
-    empty?: boolean,
+    density?: number,
     airy?: boolean,
     behaviors?: Behavior[],
     maxSpeed?: number,
@@ -15,7 +15,7 @@ type ParticleProps = {
 }
 
 export abstract class Particle {
-    public readonly empty: boolean;
+    public readonly density: number;
     public readonly airy: boolean;
     private readonly behaviors: Map<Constructor<Behavior>, Behavior>;
     public dirty: boolean = false;
@@ -27,9 +27,9 @@ export abstract class Particle {
     protected constructor(
         private currentIndex: number,
         public color: string,
-        {empty, behaviors, airy, maxSpeed, acceleration, velocity}: ParticleProps = {},
+        {density, behaviors, airy, maxSpeed, acceleration, velocity}: ParticleProps = {},
     ) {
-        this.empty = empty ?? false;
+        this.density = density ?? 0;
         this.airy = airy ?? false;
         this.maxSpeed = maxSpeed ?? 0;
         this.acceleration = acceleration ?? 0;

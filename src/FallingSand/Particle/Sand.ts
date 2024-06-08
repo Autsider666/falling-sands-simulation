@@ -11,6 +11,7 @@ export class Sand extends Particle {
             index,
             Particle.varyColor(Sand.baseColor),
             {
+                density: 150,
                 maxSpeed: 8,
                 acceleration: 0.4
             }

@@ -6,7 +6,7 @@ export class Wood extends Particle {
     static name: string = 'Wood';
 
     constructor(index: number) {
-        super(index, Particle.varyColor(Wood.baseColor));
+        super(index, Particle.varyColor(Wood.baseColor),{density: 500});
 
         this.addBehaviour(new Flammable(this, {
             fuel: 200 + 100 * (Math.random()),

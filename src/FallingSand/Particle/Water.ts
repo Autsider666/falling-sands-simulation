@@ -7,9 +7,11 @@ export class Water extends Particle {
 
     constructor(index: number) {
         super(index,
-            Particle.varyColor(Water.baseColor,{lightnessModifier:()=> 0}), {
+            Particle.varyColor(Water.baseColor,{lightnessModifier:()=> 0}),
+            {
                 maxSpeed: 8,
                 acceleration: 0.4,
+                density: 100,
             });
 
         this.addBehaviour(new FluidMoves(this));

@@ -27,6 +27,7 @@ export class Smoke extends Particle {
             airy: true,
             maxSpeed: 0.25,
             acceleration: -0.05,
+            density: 1,
         });
 
         if (burning) {

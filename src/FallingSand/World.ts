@@ -33,7 +33,12 @@ export class World extends Actor {
             width: gridWidth * particleSize,
             anchor: Vector.Zero,
         });
-        this.grid = new Array2D<Particle>(gridHeight, gridWidth, (index: number) => new Air(index), (a, b) => a.empty && b.empty);
+        this.grid = new Array2D<Particle>(
+            gridHeight,
+            gridWidth,
+            (index: number) => new Air(index),
+            (a, b) => !a && !b, //FIXME used to be a.empty && b.empty
+        );
 
         this.canvas = new DirtyCanvas({
             height: gridHeight * particleSize,

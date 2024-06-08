@@ -67,8 +67,8 @@ export class MovesDown<Params extends BaseBehaviourParams = BaseBehaviourParams>
         return floored + (Math.random() < mod ? 1 : 0);
     }
 
-    canPassThrough(particle: Particle): boolean {
-        return (particle?.empty || particle?.airy) ?? false;
+    canPassThrough(particle: Particle|undefined): boolean {
+        return particle !== undefined && particle.density < this.owner.density;
     }
 
     possibleMoves(grid: Array2D<Particle>, i: number): { moves: number[], weights: number[] } {
@@ -102,9 +102,10 @@ export class MovesDown<Params extends BaseBehaviourParams = BaseBehaviourParams>
         return {moves, weights};
     }
 
-    step(particle: Particle, grid: Array2D<Particle>): void {
+    updateStep(particle: Particle, grid: Array2D<Particle>): void {
         const i = particle.index;
-        if (grid.getIndex(i)?.empty !== false) {
+        // if (grid.getIndex(i)?.empty !== false) {
+        if (particle.density === 0) {
             this.resetVelocity();
             return;
         }
@@ -130,7 +131,7 @@ export class MovesDown<Params extends BaseBehaviourParams = BaseBehaviourParams>
 
         // Update the number of times the particle instructs us to
         for (let v = 0; v < updateCount; v++) {
-            this.step(particle, grid);
+            this.updateStep(particle, grid);
             const newIndex = particle.index;
 
             // If we swapped the particle to a new location,
