@@ -22,7 +22,6 @@ type ParticleProps = {
 }
 
 export abstract class Particle {
-    static test: string;
     public readonly density: number;
     private readonly behaviors: Map<Constructor<Behavior>, Behavior>;
     public dirty: boolean = false;

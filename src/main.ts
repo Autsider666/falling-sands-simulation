@@ -13,8 +13,8 @@ const screenWidth = Math.min(window.innerWidth);
 const screenHeight = Math.min(window.innerHeight);
 
 const particleSize = Math.max(parseInt(urlParams.get('particleSize') ?? "4"),1);
-const worldWidth = Math.floor(screenWidth/particleSize);
-const worldHeight = Math.floor(screenHeight/particleSize);
+const worldWidth = Math.round(screenWidth/particleSize);
+const worldHeight = Math.round(screenHeight/particleSize);
 // const worldWidth = 265;
 // const worldHeight = 190;
 

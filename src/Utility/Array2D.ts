@@ -1,3 +1,5 @@
+import {Coordinate} from "./Traversal.ts";
+
 export class Array2D<I> {
     private store: Array<I>;
     public readonly changedIndexes = new Set<number>();
@@ -5,9 +7,9 @@ export class Array2D<I> {
     constructor(
         readonly height: number,
         readonly width: number,
-        private readonly defaultValue: (index: number) => I,
+        private readonly defaultValue: (index: number, coordinate: Coordinate) => I,
     ) {
-        this.store = [...Array<I>(this.width * this.height)].map((_, index) => defaultValue(index));
+        this.store = [...Array<I>(this.width * this.height)].map((_, index) => defaultValue(index, this.toCoordinates(index)));
     }
 
     get length(): number {
@@ -15,7 +17,7 @@ export class Array2D<I> {
     }
 
     clear(): void {
-        this.store = [...Array<I>(this.width * this.height)].map((_, index) => this.defaultValue(index));
+        this.store = [...Array<I>(this.width * this.height)].map((_, index) => this.defaultValue(index, this.toCoordinates(index)));
         this.changedIndexes.clear();
     }
 
@@ -61,6 +63,6 @@ export class Array2D<I> {
     }
 
     clearIndex(index: number) {
-        this.store[index] = this.defaultValue(index);
+        this.store[index] = this.defaultValue(index, this.toCoordinates(index));
     }
 }
