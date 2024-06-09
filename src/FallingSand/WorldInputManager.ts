@@ -128,14 +128,13 @@ export class WorldInputManager extends Actor {
         }
 
         if (this.lastPointerPos) {
-            console.log(this.lastPointerPos);
             Traversal.iterateBetweenTwoCoordinates(
                 this.lastPointerPos,
                 engine.input.pointers.primary.lastWorldPos,
                 this.draw.bind(this),
             );
         }
-        console.log(1, this.pos);
+
         this.lastPointerPos = this.pos.clone();
     }
 
