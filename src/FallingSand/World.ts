@@ -86,7 +86,30 @@ export class World extends Actor {
         });
     }
 
-    public createParticles(pos: Coordinate, type: ElementIdentifier, radius: number = 1, probability: number = 1, override:boolean = false) {
+    public createParticles(pos: Coordinate, type: ElementIdentifier, radius: number = 1, probability: number = 1, override: boolean = false) {
+        this.iterateAroundCoordinate(
+            pos,
+            index => {
+                if (override || this.matrix.getIndex(index) === undefined) {
+                    this.matrix.setIndex(index, Element.create(index, type));
+                }
+            },
+            radius,
+            probability,
+        );
+    }
+
+    public removeParticles(pos: Coordinate, radius: number = 1, probability: number = 1) {
+        this.iterateAroundCoordinate(
+            pos,
+            index => this.matrix.getIndex(index) !== undefined ? this.matrix.setIndex(index, undefined) : undefined,
+            radius,
+            probability,
+        );
+    }
+
+
+    private iterateAroundCoordinate(pos: Coordinate, callback: (index: number, coordinate: Coordinate) => void, radius: number, probability: number) {
         const radiusSquared = radius * radius;
         const {x, y} = this.toGridCoordinates(pos);
         for (let dX = -radius; dX <= radius; dX++) {
@@ -100,9 +123,7 @@ export class World extends Actor {
                     const resultingX = x + dX;
                     if (this.dimensionalWraparound || resultingX >= 0 && resultingX < this.matrix.width - 1) {
                         const index = this.matrix.toIndex(resultingX, resultingY);
-                        if (override || this.matrix.getIndex(index) === undefined) {
-                            this.matrix.set(resultingX, resultingY, Element.create(index, type));
-                        }
+                        callback(index, {x: resultingX, y: resultingY});
                     }
                 }
             }

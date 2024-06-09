@@ -4,6 +4,7 @@ import {ElementIdentifier, Elements} from "./Elements.ts";
 import {World} from "./FallingSand/World.ts";
 import {WorldInputManager} from "./FallingSand/WorldInputManager.ts";
 import DynamicEventListener from "./Utility/DynamicEventListener.ts";
+import {StringHelper} from "./Utility/StringHelper.ts";
 
 const worldWidth = 265;
 const worldHeight = 190;
@@ -53,19 +54,17 @@ for (const name of Object.keys(Elements) as ElementIdentifier[]) {
 
     const button = document.createElement<'button'>('button', {});
     button.innerText = name;
-    button.id = name;
+    button.id = StringHelper.toClassName(name);
     button.style.background = color;
 
     menu.append(button);
 
     elementButtons.set(name, button);
 
-    DynamicEventListener.register(`button#${name}`, 'click', () => setActiveElement(name));
+    DynamicEventListener.register(`button#${StringHelper.toClassName(name)}`, 'click', () => setActiveElement(name));
 }
 
 setActiveElement(selectedElement, true);
-DynamicEventListener.register('canvas', 'mousedown', () => console.log(1));
-
 DynamicEventListener.register('button#clear', 'click', () => world.clear());
 DynamicEventListener.register('button#play', 'click', () => world.setSimulationSpeed(1));
 DynamicEventListener.register('button#pause', 'click', () => world.setSimulationSpeed(0));

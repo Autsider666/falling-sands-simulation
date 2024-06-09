@@ -5,20 +5,20 @@ import {Moves} from "./Moves.ts";
 const random = new Random();
 
 export class FluidMoves extends Moves {
-    private lastHeight:number = 0;
+    private lastHeight: number = 0;
     private heightCounter: number = 1;
 
     possibleMoves(matrix: CellularMatrix, i: number): { moves: number[]; weights: number[] } {
-        const result =  super.possibleMoves(matrix, i);
+        const result = super.possibleMoves(matrix, i);
 
-        if(result.weights.length === 0) {
-            const dir =random.integer(1,5);
+        if (result.weights.length === 0) {
+            const dir = random.integer(1, 5);
             const {y} = matrix.toCoordinates(i);
 
             if (this.lastHeight !== y) {
                 this.lastHeight = y;
                 this.heightCounter = 50;
-            } else if (--this.heightCounter <= 0 && random.bool(10/Math.abs(this.heightCounter))) {
+            } else if (--this.heightCounter <= 0 && random.bool(10 / Math.abs(this.heightCounter))) {
                 return result;
             }
 

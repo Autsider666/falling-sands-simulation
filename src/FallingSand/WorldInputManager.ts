@@ -13,6 +13,7 @@ export enum WorldAction {
     IncreaseDrawSize = 'IncreaseDrawSize',
     DecreaseDrawSize = 'DecreaseDrawSize',
     Draw = 'Draw',
+    Erase = 'Erase',
 }
 
 export type WorldConfig = Record<WorldAction, InputType[]>;
@@ -20,15 +21,17 @@ export type WorldConfig = Record<WorldAction, InputType[]>;
 export class WorldInputManager extends Actor {
     private isDrawing: boolean = false;
     private overrideWorld: boolean = false;
+    private isErasing: boolean = false;
     private lastPointerPos: Vector = Vector.Zero;
     private config: WorldConfig = {
-        [WorldAction.Toggle]: [InputType.Space, InputType.Left],
+        [WorldAction.Toggle]: [InputType.Space],
         [WorldAction.Force]: [InputType.ShiftLeft],
         [WorldAction.Draw]: [InputType.Left],
         [WorldAction.IncreaseDrawSize]: [InputType.ScrollUp],
         [WorldAction.DecreaseDrawSize]: [InputType.ScrollDown],
         [WorldAction.Pause]: [],
-        [WorldAction.Play]: []
+        [WorldAction.Play]: [],
+        [WorldAction.Erase]: [InputType.ControlLeft]
     };
 
     private readonly canvas: Canvas;
@@ -40,7 +43,7 @@ export class WorldInputManager extends Actor {
         private element: ElementIdentifier,
         private readonly particleSize: number,
         private drawRadius: number = 3,
-        private minDrawRadius: number = 1,
+        private minDrawRadius: number = 0,
         private maxDrawRadius: number = 50,
     ) {
         super({
@@ -71,7 +74,8 @@ export class WorldInputManager extends Actor {
                 } else {
                     this.draw(this.pos);
                 }
-            }
+            },
+            [WorldAction.Erase]: released => this.toggleErase(released === undefined ? undefined : !released),
         };
     }
 
@@ -124,14 +128,31 @@ export class WorldInputManager extends Actor {
         this.canvas.flagDirty();
     }
 
+    private toggleErase(force?: boolean): void {
+        if (force === undefined) {
+            this.isErasing = !this.isErasing;
+        } else {
+            this.isErasing = force;
+        }
+
+        this.canvas.flagDirty();
+    }
+
     private draw(coordinate: Coordinate): void {
-        this.world.createParticles(
-            coordinate,
-            this.element,
-            this.drawRadius,
-            Elements[this.element].drawProbability ?? 1,
-            this.overrideWorld,
-        );
+        if (!this.isErasing){
+            this.world.createParticles(
+                coordinate,
+                this.element,
+                this.drawRadius,
+                Elements[this.element].drawProbability ?? 1,
+                this.overrideWorld,
+            );
+        } else {
+            this.world.removeParticles(
+                coordinate,
+                this.drawRadius,
+            );
+        }
     }
 
     private startDrawing(): void {
@@ -154,7 +175,8 @@ export class WorldInputManager extends Actor {
     private drawCanvas(ctx: CanvasRenderingContext2D): void {
         const {color, colorVariance} = Elements[this.element];
 
-        const radiusSquared = this.drawRadius * this.drawRadius;
+        const radiusSquared = Math.pow(this.drawRadius,2);
+        const outerDarius = Math.pow(this.drawRadius-1,2);
         for (let dX = -this.drawRadius; dX <= this.drawRadius; dX++) {
             for (let dY = -this.drawRadius; dY <= this.drawRadius; dY++) {
                 if (dX * dX + dY * dY <= radiusSquared) {
@@ -162,18 +184,26 @@ export class WorldInputManager extends Actor {
                     //     continue;
                     // }
 
-                    let resultingColor: string = color;
-                    if (colorVariance !== false) {
-                        resultingColor = Particle.varyColor(
-                            color,
-                            {
-                                ...colorVariance,
-                                alpha: {value: this.overrideWorld ? 0 : -0.5},
-                            }
-                        );
+                    if (!this.isErasing) {
+                        let resultingColor: string = color;
+                        if (colorVariance !== false) {
+                            resultingColor = Particle.varyColor(
+                                color,
+                                {
+                                    ...colorVariance,
+                                    alpha: {value: this.overrideWorld ? 0 : -0.5},
+                                }
+                            );
+                        }
+
+                        ctx.fillStyle = resultingColor;
+                    } else if (dX * dX + dY * dY >= outerDarius) {
+                        ctx.fillStyle = 'rgba(255,0,0,0.50)';
+                    } else {
+                        ctx.fillStyle = '#00000000';
                     }
 
-                    ctx.fillStyle = resultingColor;
+
                     ctx.fillRect((this.maxDrawRadius + dX) * this.particleSize, (this.maxDrawRadius + dY) * this.particleSize, this.particleSize, this.particleSize);
                 }
             }

@@ -46,6 +46,23 @@ const elements = {
         color: '#e34f0f',
         burning: true,
     },
+    "Liquid Fire": {
+        color: '#E35D23B2',
+        burning: true,
+        density: 10,
+        maxSpeed: 8,
+        acceleration: 0.4,
+        fluidity: 1, //FIXME
+    },
+    Oil: { //Should probably be an emitter of burnable fumes
+      color: '#3B3131',
+        fuel: () => 500 + 500 * Math.random(),
+        chanceToIgnite: 0.025,
+        density: 25,
+        maxSpeed: 8,
+        acceleration: 0.4,
+        fluidity: 1, //FIXME
+    },
     Smoke: {
         color: '#4C4A4D',
         colorVariance: {
@@ -65,6 +82,10 @@ const elements = {
         density: 500,
         fuel: () => 200 + 100 * Math.random(),
         chanceToIgnite: 0.005,
+    },
+    Stone: {
+        color: '#ada7a9',
+        density: 500,
     },
     Water: {
         color: '#28A5EE',

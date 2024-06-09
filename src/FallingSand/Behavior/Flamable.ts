@@ -68,10 +68,11 @@ export class Flammable extends LimitedLife {
         if (!this.burning) {
             return;
         }
+
         const index = particle.index;
 
         const column = index % matrix.width;
-        const candidates = [];
+        // const candidates = [];
         // Each of the 8 directions
         for (let dX = -1; dX <= 1; dX++) {
             for (let dY = -1; dY <= 1; dY++) {
@@ -81,23 +82,35 @@ export class Flammable extends LimitedLife {
                 const inBounds = dI >= 0 && dI < (matrix.height * matrix.height);
                 // Make sure we didn't wrap to the next or previous row
                 const noWrap = Math.abs(x - column) <= 1;
-                if (inBounds && noWrap) {
-                    candidates.push(dI);
+                if (!inBounds || !noWrap) {
+                    continue;
                 }
+
+                // candidates.push(dI);
+                const candidateParticle = matrix.getIndex(dI);
+                if (!candidateParticle) {
+                    continue;
+                }
+
+                const flammable = candidateParticle.getBehavior(Flammable);
+                if (flammable) {
+                    flammable.chancesToCatch += 0.5 + Math.random() * 0.5;
+                }
+
             }
         }
 
-        for (const i of candidates) {
-            const candidateParticle = matrix.getIndex(i);
-            if (!candidateParticle) {
-                continue;
-            }
-
-            const flammable = candidateParticle.getBehavior(Flammable);
-            if (flammable) {
-                flammable.chancesToCatch += 0.5 + Math.random() * 0.5;
-            }
-        }
+        // for (const i of candidates) { //TODO check if this change is actually more/less performant
+        //     const candidateParticle = matrix.getIndex(i);
+        //     if (!candidateParticle) {
+        //         continue;
+        //     }
+        //     console.log(candidateParticle);
+        //     const flammable = candidateParticle.getBehavior(Flammable);
+        //     if (flammable) {
+        //         flammable.chancesToCatch += 0.5 + Math.random() * 0.5;
+        //     }
+        // }
     }
 
     update(particle: Particle, matrix: CellularMatrix) {
