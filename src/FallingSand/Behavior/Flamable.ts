@@ -79,7 +79,7 @@ export class Flammable extends LimitedLife {
                 const dI = index + dX + dY * matrix.width;
                 const x = dI % matrix.width;
                 // Make sure it's in our matrix
-                const inBounds = dI >= 0 && dI < (matrix.height * matrix.height);
+                const inBounds = dI >= 0 && dI < (matrix.height * matrix.width);
                 // Make sure we didn't wrap to the next or previous row
                 const noWrap = Math.abs(x - column) <= 1;
                 if (!inBounds || !noWrap) {
