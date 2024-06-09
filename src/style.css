@@ -67,4 +67,5 @@ body {
 
 canvas {
     border: 2px black dashed;
+    cursor: none;
 }

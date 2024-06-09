@@ -84,6 +84,7 @@ export abstract class Particle {
         hue: hueModifier = {value: 0},
         saturation: saturationModifier = {min: -20, max: 0},
         lightness: lightnessModifier = {min: -10, max: 0}, //TODO Switch to min/max config
+        alpha: alphaModifier = {value: 0}, //TODO Switch to min/max config
     }: ColorVariance = {}): string { //TODO move
         const {h, s, l, a} = this.toHSLA(color);
         const hue = Math.floor(h * 360) + randomByConfig(hueModifier);
@@ -91,7 +92,8 @@ export abstract class Particle {
         saturation = Math.max(0, Math.min(100, saturation));
         let lightness = (l * 100) + randomByConfig(lightnessModifier);
         lightness = Math.max(0, Math.min(100, lightness));
-        return `hsla(${hue}, ${saturation}%, ${lightness}%, ${a.toFixed(1)})`;
+        const alpha = Math.min(Math.max(a + randomByConfig(alphaModifier), 0), 1);
+        return `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha.toFixed(1)})`;
     }
 
     protected static toHSLA(color: string): { h: number, s: number, l: number, a: number } { //TODO move

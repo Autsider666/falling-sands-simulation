@@ -4,12 +4,14 @@ export type ColorVariance = {
     hue?: ColorVarianceConfig,
     saturation?: ColorVarianceConfig,
     lightness?: ColorVarianceConfig,
+    alpha?: ColorVarianceConfig,
 };
 
 export interface ElementData {
     color: HexColor,
     colorVariance?: ColorVariance | false
     canDraw?: boolean,
+    drawProbability?:number,
     density?: number,
     maxSpeed?: number,
     acceleration?: number,
@@ -38,6 +40,7 @@ const elements = {
         density: 150,
         maxSpeed: 8,
         acceleration: 0.4,
+        drawProbability: 0.5,
     },
     Fire: {
         color: '#e34f0f',
@@ -55,6 +58,7 @@ const elements = {
         acceleration: -0.05,
         duration: () => 400 + 400 * Math.random(),
         fireSpreadSpeedModifier: 0.5,
+        drawProbability: 0.25,
     },
     Wood: {
         color: '#46281d',

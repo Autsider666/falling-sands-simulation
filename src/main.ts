@@ -2,11 +2,12 @@ import './style.css';
 import {Color, Engine} from "excalibur";
 import {ElementIdentifier, Elements} from "./Elements.ts";
 import {World} from "./FallingSand/World.ts";
+import {WorldInputManager} from "./FallingSand/WorldInputManager.ts";
 import DynamicEventListener from "./Utility/DynamicEventListener.ts";
 
-const worldWidth = 350;
-const worldHeight = 250;
-const particleSize = 3;
+const worldWidth = 265;
+const worldHeight = 190;
+const particleSize = 4;
 
 const game = new Engine({
     width: worldWidth * particleSize,
@@ -29,12 +30,15 @@ function setActiveElement(name: ElementIdentifier, force: boolean = false): void
     elementButtons.get(name)?.classList.add('active');
     selectedElement = name;
 
-    world.setCurrentParticle(name);
+    pointer.changeElement(name);
 }
 
-const world = new World(worldHeight, worldWidth, particleSize, selectedElement);
+const world = new World(worldHeight, worldWidth, particleSize);
 
 game.add(world);
+
+const pointer = new WorldInputManager(world, selectedElement,particleSize);
+game.add(pointer);
 
 const menu = document.getElementById('menu');
 if (!menu) {
@@ -60,6 +64,7 @@ for (const name of Object.keys(Elements) as ElementIdentifier[]) {
 }
 
 setActiveElement(selectedElement, true);
+DynamicEventListener.register('canvas', 'mousedown', () => console.log(1));
 
 DynamicEventListener.register('button#clear', 'click', () => world.clear());
 DynamicEventListener.register('button#play', 'click', () => world.setSimulationSpeed(1));
