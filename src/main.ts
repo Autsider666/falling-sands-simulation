@@ -7,10 +7,12 @@ import dynamicEventListener from "./Utility/DynamicEventListener.ts";
 import DynamicEventListener from "./Utility/DynamicEventListener.ts";
 import {StringHelper} from "./Utility/StringHelper.ts";
 
+const urlParams = new URLSearchParams(window.location.search);
+
 const screenWidth = Math.min(window.innerWidth);
 const screenHeight = Math.min(window.innerHeight);
 
-const particleSize = 4;
+const particleSize = Math.max(parseInt(urlParams.get('particleSize') ?? "4"),1);
 const worldWidth = Math.floor(screenWidth/particleSize);
 const worldHeight = Math.floor(screenHeight/particleSize);
 // const worldWidth = 265;
@@ -20,8 +22,6 @@ const worldHeight = Math.floor(screenHeight/particleSize);
 // portrait.addEventListener("change", function(e) {
 //     console.log(e);
 // });
-
-console.log({particleSize, worldHeight,worldWidth});
 
 const game = new Engine({
     width: worldWidth * particleSize,

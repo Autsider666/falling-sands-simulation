@@ -23,7 +23,7 @@ export class WorldInputManager extends Actor {
     private overrideWorld: boolean = false;
     private isErasing: boolean = false;
     private visibleIn: number = 2;
-    private lastPointerPos: Vector = Vector.Zero;
+    private lastPointerPos?: Vector;
     private config: WorldConfig = {
         [WorldAction.Toggle]: [InputType.Space],
         [WorldAction.Force]: [InputType.ShiftLeft],
@@ -127,12 +127,15 @@ export class WorldInputManager extends Actor {
             return;
         }
 
-        Traversal.iterateBetweenTwoCoordinates(
-            this.lastPointerPos,
-            engine.input.pointers.primary.lastWorldPos,
-            this.draw.bind(this),
-        );
-
+        if (this.lastPointerPos) {
+            console.log(this.lastPointerPos);
+            Traversal.iterateBetweenTwoCoordinates(
+                this.lastPointerPos,
+                engine.input.pointers.primary.lastWorldPos,
+                this.draw.bind(this),
+            );
+        }
+        console.log(1, this.pos);
         this.lastPointerPos = this.pos.clone();
     }
 
@@ -179,7 +182,7 @@ export class WorldInputManager extends Actor {
         }
 
         this.isDrawing = true;
-        this.lastPointerPos = this.pos.clone();
+        // this.lastPointerPos = this.pos.clone();
     }
 
     private stopDrawing(): void {
@@ -188,6 +191,7 @@ export class WorldInputManager extends Actor {
         }
 
         this.isDrawing = false;
+        this.lastPointerPos = undefined;
     }
 
     private drawCanvas(ctx: CanvasRenderingContext2D): void {
