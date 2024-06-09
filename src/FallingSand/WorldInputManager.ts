@@ -22,6 +22,7 @@ export class WorldInputManager extends Actor {
     private isDrawing: boolean = false;
     private overrideWorld: boolean = false;
     private isErasing: boolean = false;
+    private visibleIn: number = 2;
     private lastPointerPos: Vector = Vector.Zero;
     private config: WorldConfig = {
         [WorldAction.Toggle]: [InputType.Space],
@@ -58,6 +59,7 @@ export class WorldInputManager extends Actor {
         });
 
         this.graphics.add(this.canvas);
+        this.graphics.visible = false;
 
         this.actionMap = {
             [WorldAction.Toggle]: (released?: boolean) => this.world.setSimulationSpeed(released ? 1 : 0),
@@ -87,6 +89,17 @@ export class WorldInputManager extends Actor {
         engine.input.keyboard.on("release", ({key}) => this.handleInputEvent(key, true));
     }
 
+    toggleVisible(visible?: boolean): void {
+        const isVisible = visible === undefined ? !(this.visibleIn < 0) : visible;
+
+        if (!isVisible) {
+            this.visibleIn = -1;
+            this.graphics.visible = false;
+        } else {
+            this.visibleIn = 2;
+        }
+    }
+
     setDrawRadius(radius: number): void {
         this.drawRadius = Math.max(Math.min(radius, this.maxDrawRadius), this.minDrawRadius);
 
@@ -106,9 +119,14 @@ export class WorldInputManager extends Actor {
     onPreUpdate(engine: Engine/** , delta: number **/) {
         this.pos = engine.input.pointers.primary.lastWorldPos;
 
+        if (!this.graphics.visible && --this.visibleIn === 0) {
+            this.graphics.visible = true;
+        }
+
         if (!this.isDrawing) {
             return;
         }
+
         Traversal.iterateBetweenTwoCoordinates(
             this.lastPointerPos,
             engine.input.pointers.primary.lastWorldPos,
@@ -139,7 +157,7 @@ export class WorldInputManager extends Actor {
     }
 
     private draw(coordinate: Coordinate): void {
-        if (!this.isErasing){
+        if (!this.isErasing) {
             this.world.createParticles(
                 coordinate,
                 this.element,
@@ -175,8 +193,8 @@ export class WorldInputManager extends Actor {
     private drawCanvas(ctx: CanvasRenderingContext2D): void {
         const {color, colorVariance} = Elements[this.element];
 
-        const radiusSquared = Math.pow(this.drawRadius,2);
-        const outerDarius = Math.pow(this.drawRadius-1,2);
+        const radiusSquared = Math.pow(this.drawRadius, 2);
+        const outerDarius = Math.pow(this.drawRadius - 1, 2);
         for (let dX = -this.drawRadius; dX <= this.drawRadius; dX++) {
             for (let dY = -this.drawRadius; dY <= this.drawRadius; dY++) {
                 if (dX * dX + dY * dY <= radiusSquared) {

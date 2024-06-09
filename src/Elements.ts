@@ -84,7 +84,7 @@ const elements = {
         chanceToIgnite: 0.005,
     },
     Stone: {
-        color: '#ada7a9',
+        color: '#8f8d8e',
         density: 500,
     },
     Water: {

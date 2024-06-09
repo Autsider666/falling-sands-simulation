@@ -3,12 +3,25 @@ import {Color, Engine} from "excalibur";
 import {ElementIdentifier, Elements} from "./Elements.ts";
 import {World} from "./FallingSand/World.ts";
 import {WorldInputManager} from "./FallingSand/WorldInputManager.ts";
+import dynamicEventListener from "./Utility/DynamicEventListener.ts";
 import DynamicEventListener from "./Utility/DynamicEventListener.ts";
 import {StringHelper} from "./Utility/StringHelper.ts";
 
-const worldWidth = 265;
-const worldHeight = 190;
+const screenWidth = Math.min(window.innerWidth);
+const screenHeight = Math.min(window.innerHeight);
+
 const particleSize = 4;
+const worldWidth = Math.floor(screenWidth/particleSize);
+const worldHeight = Math.floor(screenHeight/particleSize);
+// const worldWidth = 265;
+// const worldHeight = 190;
+
+// const portrait = window.matchMedia("(orientation: portrait)"); //TODO let's translate matrix on mobile phone turn
+// portrait.addEventListener("change", function(e) {
+//     console.log(e);
+// });
+
+console.log({particleSize, worldHeight,worldWidth});
 
 const game = new Engine({
     width: worldWidth * particleSize,
@@ -18,6 +31,7 @@ const game = new Engine({
 });
 
 await game.start();
+
 
 let selectedElement: ElementIdentifier = 'Sand';
 const elementButtons = new Map<ElementIdentifier, HTMLButtonElement>();
@@ -38,7 +52,7 @@ const world = new World(worldHeight, worldWidth, particleSize);
 
 game.add(world);
 
-const pointer = new WorldInputManager(world, selectedElement,particleSize);
+const pointer = new WorldInputManager(world, selectedElement, particleSize);
 game.add(pointer);
 
 const menu = document.getElementById('menu');
@@ -69,3 +83,7 @@ DynamicEventListener.register('button#clear', 'click', () => world.clear());
 DynamicEventListener.register('button#play', 'click', () => world.setSimulationSpeed(1));
 DynamicEventListener.register('button#pause', 'click', () => world.setSimulationSpeed(0));
 DynamicEventListener.register('button#toggle-wraparound', 'click', () => world.toggleDimensionalWraparound());
+
+dynamicEventListener.register('#menu, #menu button','mouseover', () => pointer.toggleVisible(false));
+dynamicEventListener.register('canvas','mouseover', () => pointer.toggleVisible(true));
+dynamicEventListener.register('#menu, #menu button','mouseleave', () => pointer.toggleVisible(true));
