@@ -107,22 +107,16 @@ export class World extends Actor {
             ctx.fillRect(x * this.particleSize, y * this.particleSize, this.particleSize, this.particleSize);
         }
 
+        console.log(this.matrix.changedIndexes.size);
         this.matrix.changedIndexes.clear();
     }
 
     private updateGrid() {
-        let particleCount = 0;
         this.stats?.begin();
-        [-1, 1].forEach(direction => {
-            this.matrix.randomWalk((particle) => {
-                if (particle) {
-                    if (direction === 1) particleCount++;
-                    particle.update(this.matrix, {direction});
-                }
-            }, direction < 0);
-        });
 
-        this.stats?.end({Particles: {value: particleCount, maxValue: this.matrix.length}});
+        this.matrix.simulate();
+
+        this.stats?.end();
     }
 
     public createParticles(pos: Coordinate, type: ElementIdentifier, radius: number = 1, probability: number = 1, override: boolean = false) {

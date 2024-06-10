@@ -95,6 +95,8 @@ export class Flammable extends LimitedLife {
                 const flammable = candidateParticle.getBehavior(Flammable);
                 if (flammable) {
                     flammable.chancesToCatch += 0.5 + Math.random() * 0.5;
+                    candidateParticle.dirty = true; //TODO does this really help?
+                    matrix.changedIndexes.add(dI);
                 }
 
             }
@@ -113,12 +115,14 @@ export class Flammable extends LimitedLife {
         // }
     }
 
-    update(particle: Particle, matrix: CellularMatrix):void {
+    update(particle: Particle, matrix: CellularMatrix): void {
+        let dirty = false;
         if (this.chancesToCatch > 0 && !this.burning) {
             if (Math.random() < this.chanceToSpread(this) * (this.chancesToCatch * this.chanceToIgnite)) {
                 this.burning = true;
             }
             this.chancesToCatch = 0;
+            dirty = true;
         }
         if (this.burning) {
             super.update(particle, matrix);
@@ -127,6 +131,7 @@ export class Flammable extends LimitedLife {
                 matrix.changedIndexes.add(particle.index);
             }
             particle.color = this.burntColor;
+            dirty = true;
         }
 
         if (this.burning && Math.random() < this.chanceToExtinguish) {
@@ -134,5 +139,9 @@ export class Flammable extends LimitedLife {
         }
 
         this.updateStep(particle, matrix);
+
+        if (dirty) {
+            this.owner.dirty = true;
+        }
     }
 }

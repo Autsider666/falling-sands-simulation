@@ -122,13 +122,12 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
         return /** this.owner.isFreeFalling && **/ direction === Math.sign(this.nextVelocity());
     }
 
-    update(particle: Particle, matrix: CellularMatrix, params: Params): boolean {
+    update(particle: Particle, matrix: CellularMatrix, params: Params): void {
         if (!this.shouldUpdate(params)) {
-            return false;
+            return;
         }
 
         let index = particle.index;
-        // let modified = false; // TODO not needed?
 
         this.updateVelocity();
         const updateCount = this.getUpdateCount();
@@ -145,7 +144,8 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
                 // We can add the same index multiple times, it's a set.
                 matrix.changedIndexes.add(index);
                 matrix.changedIndexes.add(newIndex);
-                // modified = true;
+
+                this.owner.dirty = true;
             } else {
                 this.resetVelocity();
                 break;
@@ -154,12 +154,5 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
             index = particle.index;
         }
 
-        if (updateCount === 0) {
-            matrix.changedIndexes.add(index);
-
-            return false;
-        }
-
-        return true;
     }
 }

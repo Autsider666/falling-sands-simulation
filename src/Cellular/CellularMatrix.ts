@@ -58,6 +58,14 @@ export class CellularMatrix extends Array2D<Particle | undefined> {
         this.setIndex(indexB, a);
     }
 
+    simulate():void {
+        [-1, 1].forEach(direction => {
+            this.randomWalk((particle) => {
+                particle?.update(this, {direction});
+            }, direction < 0);
+        });
+    }
+
     randomWalk(callback: (item: Particle | undefined, data: {
         x: number,
         y: number,

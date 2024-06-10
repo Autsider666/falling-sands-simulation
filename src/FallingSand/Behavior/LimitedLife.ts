@@ -37,6 +37,6 @@ export class LimitedLife extends Behavior {
         }
 
         this.onTick(this, particle);
-        matrix.changedIndexes.add(particle.index);
+        this.owner.dirty = true;
     }
 }
