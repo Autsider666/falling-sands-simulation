@@ -8,7 +8,7 @@ export class GasMoves extends Moves {
     // }
 
     possibleMoves(matrix:CellularMatrix, i:number) {
-        const nextDelta = Math.sign(this.owner.velocity) * matrix.width;
+        const nextDelta = Math.sign(this.owner.velocity.y) * matrix.width;
         const nextVertical = i + nextDelta;
         const column = nextVertical % matrix.width;
 

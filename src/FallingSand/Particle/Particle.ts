@@ -1,4 +1,4 @@
-import {Random} from "excalibur";
+import {Random, Vector} from "excalibur";
 import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
 import {ColorVariance} from "../../Elements.ts";
 import {BaseBehaviourParams, Behavior} from "../Behavior/Behavior.ts";
@@ -18,7 +18,6 @@ type ParticleProps = {
     behaviors?: Behavior[],
     maxSpeed?: number,
     acceleration?: number,
-    velocity?: number,
 }
 
 export abstract class Particle {
@@ -27,18 +26,18 @@ export abstract class Particle {
     public dirty: boolean = false;
 
     public maxSpeed: number;
-    public acceleration: number;
-    public velocity: number;
+    public acceleration: Vector;
+    public velocity: Vector;
 
     protected constructor(
         private currentIndex: number,
         public color: string,
-        {density, behaviors, maxSpeed, acceleration, velocity}: ParticleProps = {},
+        {density, behaviors, maxSpeed, acceleration}: ParticleProps = {},
     ) {
         this.density = density ?? 0;
         this.maxSpeed = maxSpeed ?? 0;
-        this.acceleration = acceleration ?? 0;
-        this.velocity = velocity ?? 0;
+        this.acceleration = new Vector(0,acceleration ?? 0);
+        this.velocity = new Vector(0,0);
         this.behaviors = new Map<Constructor<Behavior>, Behavior>();
         this.addBehaviors(behaviors ?? []);
     }

@@ -20,7 +20,7 @@ function choose<T>(array: T[], weights: number[]): T { //TODO better position
 
 export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> extends Behavior<Params> {
     resetVelocity() {
-        this.owner.velocity = 0;
+        this.owner.velocity.y = 0;
     }
 
     updateVelocity() {
@@ -30,7 +30,7 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
         //     newVelocity = Math.sign(newVelocity) * this.maxSpeed;
         // }
 
-        this.owner.velocity = this.nextVelocity();
+        this.owner.velocity.y = this.nextVelocity();
     }
 
     nextVelocity(): number {
@@ -38,7 +38,7 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
             return 0;
         }
 
-        let newVelocity = this.owner.velocity + this.owner.acceleration;
+        let newVelocity = this.owner.velocity.y + this.owner.acceleration.y;
 
         if (Math.abs(newVelocity) > this.owner.maxSpeed) {
             newVelocity = Math.sign(newVelocity) * this.owner.maxSpeed;
@@ -48,7 +48,7 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
     }
 
     getUpdateCount(): number {
-        const abs = Math.abs(this.owner.velocity);
+        const abs = Math.abs(this.owner.velocity.y);
         const floored = Math.floor(abs);
         const mod = abs - floored;
         // Treat a remainder (e.g. 0.5) as a random chance to update
@@ -60,7 +60,7 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
     }
 
     possibleMoves(matrix: CellularMatrix, i: number): { moves: number[], weights: number[] } {
-        const nextDelta = Math.sign(this.owner.velocity) * matrix.width;
+        const nextDelta = Math.sign(this.owner.velocity.y) * matrix.width;
         const nextVertical = i + nextDelta;
         const nextVerticalLeft = nextVertical - 1;
         const nextVerticalRight = nextVertical + 1;
