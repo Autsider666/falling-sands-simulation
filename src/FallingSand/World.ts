@@ -22,6 +22,8 @@ export class World extends Actor {
 
     private readonly stats?: Stats;
 
+    private particleDrawCount:number = 0;
+
     constructor(
         gridHeight: number,
         gridWidth: number,
@@ -66,7 +68,7 @@ export class World extends Actor {
             }
         });
 
-        // this.stats.addPanel('Particles', '#00b2ff', '#032a50');
+        this.stats.addPanel('draws', '#00b2ff', '#032a50',0,this.matrix.length);
 
         const statsDom = this.stats.dom;
         statsDom.style.top = '0';
@@ -107,7 +109,7 @@ export class World extends Actor {
             ctx.fillRect(x * this.particleSize, y * this.particleSize, this.particleSize, this.particleSize);
         }
 
-        console.log(this.matrix.changedIndexes.size);
+        this.particleDrawCount = this.matrix.changedIndexes.size;
         this.matrix.changedIndexes.clear();
     }
 
@@ -116,7 +118,7 @@ export class World extends Actor {
 
         this.matrix.simulate();
 
-        this.stats?.end();
+        this.stats?.end({draws: {value:this.particleDrawCount}});
     }
 
     public createParticles(pos: Coordinate, type: ElementIdentifier, radius: number = 1, probability: number = 1, override: boolean = false) {
