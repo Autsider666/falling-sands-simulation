@@ -77,7 +77,7 @@ body {
 /*    !*color: black;*!*/
 /*}*/
 
-canvas {
+body > canvas {
     /*border: 2px black dashed;*/
     cursor: none;
     /*position: absolute;*/

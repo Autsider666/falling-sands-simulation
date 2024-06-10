@@ -55,7 +55,7 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
         return floored + (Math.random() < mod ? 1 : 0);
     }
 
-    canPassThrough(particle: Particle|undefined): boolean {
+    canPassThrough(particle: Particle | undefined): boolean {
         return !particle || particle.density < this.owner.density;
     }
 
@@ -87,6 +87,15 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
             }
         }
 
+        if (moves.length === 0) {
+            this.owner.isFreeFalling = false;
+        } else {
+            const upstairs = matrix.getIndex(i - nextDelta);
+            if (upstairs) {
+                upstairs.isFreeFalling = true;
+            }
+        }
+
         return {moves, weights};
     }
 
@@ -110,11 +119,12 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
 
     shouldUpdate({direction}: { direction?: number }) {
         // direction = direction ?? 1;
-        return direction === Math.sign(this.nextVelocity());
+        return /** this.owner.isFreeFalling && **/ direction === Math.sign(this.nextVelocity());
     }
-    update(particle: Particle, matrix: CellularMatrix, params: Params): void {
+
+    update(particle: Particle, matrix: CellularMatrix, params: Params): boolean {
         if (!this.shouldUpdate(params)) {
-            return;
+            return false;
         }
 
         let index = particle.index;
@@ -146,7 +156,10 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
 
         if (updateCount === 0) {
             matrix.changedIndexes.add(index);
-        }
-    }
 
+            return false;
+        }
+
+        return true;
+    }
 }

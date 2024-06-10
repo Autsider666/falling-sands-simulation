@@ -5,6 +5,10 @@ import {Element} from "./Particle/Element.ts";
 import {Air} from "./Particle/Air.ts";
 import {Actor, Canvas, Engine, PointerAbstraction, Random, Vector} from "excalibur";
 import {DirtyCanvas} from "../Utility/DirtyCanvas.ts";
+import Stats from '../Utility/Stats/Stats.ts';
+
+const urlParams = new URLSearchParams(window.location.search);
+const debug: boolean = urlParams.has('debug');
 
 export class World extends Actor {
     private readonly matrix: CellularMatrix;
@@ -15,6 +19,8 @@ export class World extends Actor {
     private simulationSpeed: number = 1;
 
     private cleared: boolean = true;
+
+    private readonly stats?: Stats;
 
     constructor(
         gridHeight: number,
@@ -40,6 +46,34 @@ export class World extends Actor {
         });
 
         this.graphics.use(this.canvas);
+
+
+        if (!debug) {
+            return;
+        }
+
+        this.stats = new Stats({
+            width: 100,
+            height: 60,
+            // width: 80,
+            // height: 48,
+            showAll: true,
+            defaultPanels: {
+                MS: {
+                    decimals: 1,
+                    maxValue: 25,
+                },
+            }
+        });
+
+        // this.stats.addPanel('Particles', '#00b2ff', '#032a50');
+
+        const statsDom = this.stats.dom;
+        statsDom.style.top = '0';
+        statsDom.style.right = '0';
+        statsDom.style.left = '';
+
+        document.body.appendChild(statsDom);
     }
 
     onPreUpdate(engine: Engine) {
@@ -77,13 +111,18 @@ export class World extends Actor {
     }
 
     private updateGrid() {
+        let particleCount = 0;
+        this.stats?.begin();
         [-1, 1].forEach(direction => {
             this.matrix.randomWalk((particle) => {
                 if (particle) {
+                    if (direction === 1) particleCount++;
                     particle.update(this.matrix, {direction});
                 }
             }, direction < 0);
         });
+
+        this.stats?.end({Particles: {value: particleCount, maxValue: this.matrix.length}});
     }
 
     public createParticles(pos: Coordinate, type: ElementIdentifier, radius: number = 1, probability: number = 1, override: boolean = false) {

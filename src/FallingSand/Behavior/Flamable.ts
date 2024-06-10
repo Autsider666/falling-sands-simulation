@@ -113,7 +113,7 @@ export class Flammable extends LimitedLife {
         // }
     }
 
-    update(particle: Particle, matrix: CellularMatrix) {
+    update(particle: Particle, matrix: CellularMatrix):void {
         if (this.chancesToCatch > 0 && !this.burning) {
             if (Math.random() < this.chanceToSpread(this) * (this.chancesToCatch * this.chanceToIgnite)) {
                 this.burning = true;

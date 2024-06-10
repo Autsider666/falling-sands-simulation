@@ -12,6 +12,7 @@
     "lint": "npm run eslint && npm run tsc"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.5",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
   },
@@ -19,6 +20,7 @@
     "@eslint/js": "^9.4.0",
     "eslint": "^8.57.0",
     "excalibur": "^0.30.0-alpha.1064",
+    "lodash": "^4.17.21",
     "typescript-eslint": "^7.12.0"
   }
 }

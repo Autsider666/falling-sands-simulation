@@ -24,6 +24,7 @@ export abstract class Particle {
     public readonly density: number;
     private readonly behaviors: Map<Constructor<Behavior>, Behavior>;
     public dirty: boolean = false;
+    public isFreeFalling:boolean;
 
     public maxSpeed: number;
     public acceleration: Vector;
@@ -40,6 +41,8 @@ export abstract class Particle {
         this.velocity = new Vector(0,0);
         this.behaviors = new Map<Constructor<Behavior>, Behavior>();
         this.addBehaviors(behaviors ?? []);
+
+        this.isFreeFalling = acceleration !== undefined && acceleration > 0;
     }
 
     get index(): number {
