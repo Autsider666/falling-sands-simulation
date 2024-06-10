@@ -89,31 +89,12 @@ export class Moves<Params extends BaseBehaviourParams = BaseBehaviourParams> ext
 
         if (moves.length === 0) {
             this.owner.isFreeFalling = false;
-        } else {
-            const upstairs = matrix.getIndex(i - nextDelta);
-            if (upstairs) {
-                upstairs.isFreeFalling = true;
-            }
-
-            const leftUpstairs = matrix.getIndex(i - nextDelta - 1);
-            if (leftUpstairs) {
-                leftUpstairs.isFreeFalling = true;
-            }
-
-            const rightUpstairs = matrix.getIndex(i - nextDelta + 1);
-            if (rightUpstairs) {
-                rightUpstairs.isFreeFalling = true;
-            }
-
-            const left = matrix.getIndex(i - 1);
-            if (left) {
-                left.isFreeFalling = true;
-            }
-
-            const right = matrix.getIndex(i + 1);
-            if (right) {
-                right.isFreeFalling = true;
-            }
+        } else { //TODO check if this can be handled better by moving iterateAroundCoordinate to Matrix
+            matrix.getIndex(i - nextDelta)?.triggerFreeFalling();
+            matrix.getIndex(i - nextDelta - 1)?.triggerFreeFalling();
+            matrix.getIndex(i - nextDelta + 1)?.triggerFreeFalling();
+            matrix.getIndex(i - 1)?.triggerFreeFalling();
+            matrix.getIndex(i + 1)?.triggerFreeFalling();
         }
 
         return {moves, weights};

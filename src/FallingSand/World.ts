@@ -22,7 +22,7 @@ export class World extends Actor {
 
     private readonly stats?: Stats;
 
-    private particleDrawCount:number = 0;
+    private particleDrawCount: number = 0;
 
     constructor(
         gridHeight: number,
@@ -68,7 +68,7 @@ export class World extends Actor {
             }
         });
 
-        this.stats.addPanel('draws', '#00b2ff', '#032a50',0,this.matrix.length);
+        this.stats.addPanel('draws', '#00b2ff', '#032a50', 0, this.matrix.length);
 
         const statsDom = this.stats.dom;
         statsDom.style.top = '0';
@@ -118,7 +118,7 @@ export class World extends Actor {
 
         this.matrix.simulate();
 
-        this.stats?.end({draws: {value:this.particleDrawCount}});
+        this.stats?.end({draws: {value: this.particleDrawCount}});
     }
 
     public createParticles(pos: Coordinate, type: ElementIdentifier, radius: number = 1, probability: number = 1, override: boolean = false) {
@@ -135,21 +135,38 @@ export class World extends Actor {
     }
 
     public removeParticles(pos: Coordinate, radius: number = 1, probability: number = 1) {
+        const removed: number[] = [];
         this.iterateAroundCoordinate(
             pos,
-            index => this.matrix.getIndex(index) !== undefined ? this.matrix.setIndex(index, undefined) : undefined,
+            index => this.matrix.getIndex(index) !== undefined ? removed.push(index) && this.matrix.setIndex(index, undefined) : undefined,
             radius,
             probability,
         );
+
+        for (const index of removed) {
+            this.iterateAroundCoordinate(
+                this.matrix.toCoordinates(index),
+                    neighbor=> {
+                    if(neighbor === index){
+                        console.log('Does this happen?');
+                    }
+
+                        this.matrix.getIndex(neighbor)?.triggerFreeFalling();
+                    if (this.matrix.getIndex(neighbor)) {
+                        console.log(this.matrix.getIndex(neighbor));
+                    }
+                    },
+                1);
+        }
     }
 
 
-    private iterateAroundCoordinate(pos: Coordinate, callback: (index: number, coordinate: Coordinate) => void, radius: number, probability: number) {
+    private iterateAroundCoordinate(pos: Coordinate, callback: (index: number, coordinate: Coordinate) => void, radius: number, probability: number = 1) {
         const radiusSquared = radius * radius;
         const {x, y} = this.toGridCoordinates(pos);
         for (let dX = -radius; dX <= radius; dX++) {
             for (let dY = -radius; dY <= radius; dY++) {
-                if (dX * dX + dY * dY <= radiusSquared && this.random.bool(probability)) {
+                if (dX * dX + dY * dY <= radiusSquared && (probability >= 1 ||this.random.bool(probability))) {
                     const resultingY = y + dY;
                     if (resultingY < 0 || resultingY >= this.matrix.height - 1) {
                         continue;

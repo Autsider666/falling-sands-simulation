@@ -3,7 +3,6 @@ import {Color, Engine} from "excalibur";
 import {ElementIdentifier, Elements} from "./Elements.ts";
 import {World} from "./FallingSand/World.ts";
 import {WorldInputManager} from "./FallingSand/WorldInputManager.ts";
-import dynamicEventListener from "./Utility/DynamicEventListener.ts";
 import DynamicEventListener from "./Utility/DynamicEventListener.ts";
 import {StringHelper} from "./Utility/StringHelper.ts";
 import {URLParams} from "./Utility/URLParams.ts";
@@ -12,7 +11,7 @@ import {URLParams} from "./Utility/URLParams.ts";
 const screenWidth = Math.min(window.innerWidth);
 const screenHeight = Math.min(window.innerHeight);
 
-const particleSize = Math.max(URLParams.get('particleSize','number') ?? 4, 1);
+const particleSize = Math.max(URLParams.get('particleSize', 'number') ?? 4, 1);
 const worldWidth = Math.round(screenWidth / particleSize);
 const worldHeight = Math.round(screenHeight / particleSize);
 
@@ -29,7 +28,6 @@ const game = new Engine({
 });
 
 await game.start();
-
 
 let selectedElement: ElementIdentifier = 'Sand';
 const elementButtons = new Map<ElementIdentifier, HTMLButtonElement>();
@@ -82,6 +80,11 @@ DynamicEventListener.register('button#play', 'click', () => world.setSimulationS
 DynamicEventListener.register('button#pause', 'click', () => world.setSimulationSpeed(0));
 DynamicEventListener.register('button#toggle-wraparound', 'click', () => world.toggleDimensionalWraparound());
 
-dynamicEventListener.register('#menu, #menu button', 'mouseover', () => pointer.toggleVisible(false));
-dynamicEventListener.register('canvas', 'mouseover', () => pointer.toggleVisible(true));
-dynamicEventListener.register('#menu, #menu button', 'mouseleave', () => pointer.toggleVisible(true));
+
+const canvas = game.canvas;
+canvas.addEventListener('pointerenter', () => pointer.toggleVisible(true));
+canvas.addEventListener('pointerleave', () => pointer.toggleVisible(false));
+
+// dynamicEventListener.register('#menu, #menu button', 'mouseover', () => pointer.toggleVisible(false));
+// dynamicEventListener.register('canvas', 'mouseover', () => pointer.toggleVisible(true));
+// dynamicEventListener.register('#menu, #menu button', 'mouseleave', () => pointer.toggleVisible(true));

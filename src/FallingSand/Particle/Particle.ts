@@ -53,6 +53,10 @@ export abstract class Particle {
         this.currentIndex = index;
     }
 
+    triggerFreeFalling():void {
+        this.isFreeFalling = true;
+    }
+
     abstract get baseColor(): string;
 
     addBehaviour(behaviour: Behavior): void {

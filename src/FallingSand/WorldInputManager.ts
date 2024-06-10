@@ -1,8 +1,8 @@
-import {Actor, Canvas, Engine, Vector} from "excalibur";
+import {Actor, Engine, Vector} from "excalibur";
 import {ElementIdentifier, Elements} from "../Elements.ts";
 import {InputType} from "../Utility/InputType.ts";
 import {Coordinate, Traversal} from "../Utility/Traversal.ts";
-import {Particle} from "./Particle/Particle.ts";
+import {Pointer} from "./Graphic/Pointer.ts";
 import {World} from "./World.ts";
 
 export enum WorldAction {
@@ -22,7 +22,7 @@ export class WorldInputManager extends Actor {
     private isDrawing: boolean = false;
     private overrideWorld: boolean = false;
     private isErasing: boolean = false;
-    private visibleIn: number = 2;
+    private visibleIn: number = -1;
     private lastPointerPos?: Vector;
     private config: WorldConfig = {
         [WorldAction.Toggle]: [InputType.Space],
@@ -35,7 +35,7 @@ export class WorldInputManager extends Actor {
         [WorldAction.Erase]: [InputType.ControlLeft]
     };
 
-    private readonly canvas: Canvas;
+    private readonly canvas: Pointer;
 
     private readonly actionMap: Record<WorldAction, (released?: boolean) => void>;
 
@@ -51,12 +51,16 @@ export class WorldInputManager extends Actor {
             radius: particleSize,
         });
 
-        this.canvas = new Canvas({
-            height: 2 * (maxDrawRadius * particleSize),
-            width: 2 * (maxDrawRadius * particleSize),
-            cache: true,
-            draw: this.drawCanvas.bind(this)
-        });
+        this.canvas = new Pointer(
+            this.maxDrawRadius,
+            this.particleSize,
+            {
+                isErasing: this.isErasing,
+                overrideWorld: this.overrideWorld,
+                drawRadius: this.drawRadius,
+                element: this.element,
+            }
+        );
 
         this.graphics.add(this.canvas);
         this.graphics.visible = false;
@@ -89,12 +93,22 @@ export class WorldInputManager extends Actor {
         engine.input.keyboard.on("release", ({key}) => this.handleInputEvent(key, true));
     }
 
+    updatePointer():void {
+        this.canvas.flagDirty({
+            isErasing: this.isErasing,
+            overrideWorld: this.overrideWorld,
+            drawRadius: this.drawRadius,
+            element: this.element,
+        });
+    }
+
     toggleVisible(visible?: boolean): void {
         const isVisible = visible === undefined ? !(this.visibleIn < 0) : visible;
 
         if (!isVisible) {
             this.visibleIn = -1;
             this.graphics.visible = false;
+            this.stopDrawing();
         } else {
             this.visibleIn = 2;
         }
@@ -103,7 +117,7 @@ export class WorldInputManager extends Actor {
     setDrawRadius(radius: number): void {
         this.drawRadius = Math.max(Math.min(radius, this.maxDrawRadius), this.minDrawRadius);
 
-        this.canvas.flagDirty();
+        this.updatePointer();
     }
 
     changeElement(name: ElementIdentifier): void {
@@ -113,10 +127,10 @@ export class WorldInputManager extends Actor {
 
         this.element = name;
 
-        this.canvas.flagDirty();
+        this.updatePointer();
     }
 
-    onPreUpdate(engine: Engine/** , delta: number **/) {
+    onPreUpdate(engine: Engine) {
         this.pos = engine.input.pointers.primary.lastWorldPos;
 
         if (!this.graphics.visible && --this.visibleIn === 0) {
@@ -145,7 +159,7 @@ export class WorldInputManager extends Actor {
             this.overrideWorld = force;
         }
 
-        this.canvas.flagDirty();
+        this.updatePointer();
     }
 
     private toggleErase(force?: boolean): void {
@@ -155,7 +169,7 @@ export class WorldInputManager extends Actor {
             this.isErasing = force;
         }
 
-        this.canvas.flagDirty();
+        this.updatePointer();
     }
 
     private draw(coordinate: Coordinate): void {
@@ -181,7 +195,6 @@ export class WorldInputManager extends Actor {
         }
 
         this.isDrawing = true;
-        // this.lastPointerPos = this.pos.clone();
     }
 
     private stopDrawing(): void {
@@ -191,44 +204,6 @@ export class WorldInputManager extends Actor {
 
         this.isDrawing = false;
         this.lastPointerPos = undefined;
-    }
-
-    private drawCanvas(ctx: CanvasRenderingContext2D): void {
-        const {color, colorVariance} = Elements[this.element];
-
-        const radiusSquared = Math.pow(this.drawRadius, 2);
-        const outerDarius = Math.pow(this.drawRadius - 1, 2);
-        for (let dX = -this.drawRadius; dX <= this.drawRadius; dX++) {
-            for (let dY = -this.drawRadius; dY <= this.drawRadius; dY++) {
-                if (dX * dX + dY * dY <= radiusSquared) {
-                    // if (drawProbability && !this.random.bool(drawProbability)) {
-                    //     continue;
-                    // }
-
-                    if (!this.isErasing) {
-                        let resultingColor: string = color;
-                        if (colorVariance !== false) {
-                            resultingColor = Particle.varyColor(
-                                color,
-                                {
-                                    ...colorVariance,
-                                    alpha: {value: this.overrideWorld ? 0 : -0.5},
-                                }
-                            );
-                        }
-
-                        ctx.fillStyle = resultingColor;
-                    } else if (dX * dX + dY * dY >= outerDarius) {
-                        ctx.fillStyle = 'rgba(255,0,0,0.50)';
-                    } else {
-                        ctx.fillStyle = '#00000000';
-                    }
-
-
-                    ctx.fillRect((this.maxDrawRadius + dX) * this.particleSize, (this.maxDrawRadius + dY) * this.particleSize, this.particleSize, this.particleSize);
-                }
-            }
-        }
     }
 
     private handleInputEvent(identifier: InputType, released?: boolean): void {
