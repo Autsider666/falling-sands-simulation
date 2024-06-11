@@ -1,14 +1,11 @@
-import {CellularMatrix} from "../Cellular/CellularMatrix.ts";
-import {ElementIdentifier} from "../Elements.ts";
-import {Coordinate} from "../Utility/Traversal.ts";
-import {Element} from "./Particle/Element.ts";
-import {Air} from "./Particle/Air.ts";
+import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
+import {ElementIdentifier} from "../../Elements.ts";
+import {Coordinate} from "../../Utility/Traversal.ts";
+import {Element} from "../Particle/Element.ts";
 import {Actor, Canvas, Engine, PointerAbstraction, Random, Vector} from "excalibur";
-import {DirtyCanvas} from "../Utility/DirtyCanvas.ts";
-import Stats from '../Utility/Stats/Stats.ts';
-
-const urlParams = new URLSearchParams(window.location.search);
-const debug: boolean = urlParams.has('debug');
+import {DirtyCanvas} from "../../Utility/DirtyCanvas.ts";
+import Stats from '../../Utility/Stats/Stats.ts';
+import {WorldDraw} from "./WorldDraw.ts";
 
 export class World extends Actor {
     private readonly matrix: CellularMatrix;
@@ -24,11 +21,14 @@ export class World extends Actor {
 
     private particleDrawCount: number = 0;
 
+    private worldDraw: WorldDraw;
+
     constructor(
         gridHeight: number,
         gridWidth: number,
         private readonly particleSize: number,
         private dimensionalWraparound: boolean = false,
+        debug:boolean = false,
     ) {
         super({
             height: gridHeight * particleSize,
@@ -39,6 +39,8 @@ export class World extends Actor {
             gridHeight,
             gridWidth,
         );
+
+        this.worldDraw = new WorldDraw(this.width,this.height,particleSize);
 
         this.canvas = new DirtyCanvas({
             height: gridHeight * particleSize,
@@ -93,24 +95,11 @@ export class World extends Actor {
     }
 
     private drawCanvas(ctx: CanvasRenderingContext2D): void {
+        this.particleDrawCount = this.particleDrawCount = this.worldDraw.drawCanvas(ctx, this.matrix, {cleared: this.cleared});
+
         if (this.cleared) {
-            ctx.fillStyle = Air.baseColor;
-            ctx.fillRect(0, 0, this.width, this.height);
             this.cleared = false;
         }
-
-        for (const index of this.matrix.changedIndexes) {
-            const particle = this.matrix.getIndex(index);
-
-            const {x, y} = this.matrix.toCoordinates(index);
-
-            ctx.fillStyle = particle ? particle.color : Air.baseColor;
-
-            ctx.fillRect(x * this.particleSize, y * this.particleSize, this.particleSize, this.particleSize);
-        }
-
-        this.particleDrawCount = this.matrix.changedIndexes.size;
-        this.matrix.changedIndexes.clear();
     }
 
     private updateGrid() {

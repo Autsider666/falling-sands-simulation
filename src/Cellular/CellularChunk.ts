@@ -1,4 +1,3 @@
-import {BoundingBox} from "excalibur";
 import {Particle} from "../FallingSand/Particle/Particle.ts";
 
 export class CellularChunk {
@@ -8,7 +7,7 @@ export class CellularChunk {
 
     constructor(
         // private readonly matrix: CellularMatrix,
-        public readonly bounds: BoundingBox,
+        // public readonly bounds: BoundingBox,
     ) {
     }
 

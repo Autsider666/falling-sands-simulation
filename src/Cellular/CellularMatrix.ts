@@ -1,11 +1,9 @@
-import {BoundingBox, Random, Vector} from "excalibur";
 import {Particle} from "../FallingSand/Particle/Particle.ts";
 import {Array2D} from "../Utility/Array2D.ts";
 import {Coordinate} from "../Utility/Traversal.ts";
 import {CellularChunk} from "./CellularChunk.ts";
 
 export class CellularMatrix extends Array2D<Particle | undefined> {
-    private readonly random = new Random();
     private readonly chunks: Array2D<CellularChunk>;
 
     private readonly chunkSize: number = 20;
@@ -22,12 +20,7 @@ export class CellularMatrix extends Array2D<Particle | undefined> {
         this.chunks = new Array2D<CellularChunk>(
             Math.ceil(height / this.chunkSize),
             Math.ceil(width / this.chunkSize),
-            (_, {x, y}) => new CellularChunk(BoundingBox.fromDimension(
-                this.chunkSize,
-                this.chunkSize,
-                Vector.Zero,
-                new Vector(x * this.chunkSize, y * this.chunkSize)
-            )),
+            () => new CellularChunk(),
         );
     }
 
@@ -61,9 +54,9 @@ export class CellularMatrix extends Array2D<Particle | undefined> {
     simulate(): void {
         [-1, 1].forEach(direction => {
             this.randomWalk((particle) => {
-                if (!particle || !particle.isFreeFalling) {
-                    return;
-                }
+                // if (!particle || !particle.isFreeFalling) { // Does not work with behaviour that not related to movement
+                //     return;
+                // }
 
                 particle?.update(this, {direction});
             }, direction < 0);
@@ -77,7 +70,7 @@ export class CellularMatrix extends Array2D<Particle | undefined> {
     }) => void, reverse: boolean = false): void {
         for (let row = this.height - 1; row >= 0; row--) {
             const rowOffset = row * this.width;
-            const leftToRight = this.random.bool();
+            const leftToRight = Math.random() > 0.5;
             for (let i = 0; i < this.width; i++) {
                 // Go from right to left or left to right depending on our random value
                 const columnOffset = leftToRight ? i : -i - 1 + this.width;
