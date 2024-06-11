@@ -1,9 +1,9 @@
 import {Actor, Engine, Vector} from "excalibur";
-import {ElementIdentifier, Elements} from "../Elements.ts";
-import {InputType} from "../Utility/InputType.ts";
-import {Coordinate, Traversal} from "../Utility/Traversal.ts";
-import {Pointer} from "./Graphic/Pointer.ts";
-import {World} from "./World.ts";
+import {ElementIdentifier, Elements} from "../../Elements.ts";
+import {SimulationInterface} from "../../SimulationInterface.ts";
+import {InputType} from "../../Utility/InputType.ts";
+import {Coordinate, Traversal} from "../../Utility/Traversal.ts";
+import {Pointer} from "../Graphic/Pointer.ts";
 
 export enum WorldAction {
     Toggle = 'Toggle',
@@ -40,7 +40,7 @@ export class WorldInputManager extends Actor {
     private readonly actionMap: Record<WorldAction, (released?: boolean) => void>;
 
     constructor(
-        private readonly world: World,
+        private readonly simulation: SimulationInterface,
         private element: ElementIdentifier,
         private readonly particleSize: number,
         private drawRadius: number = 3,
@@ -66,9 +66,9 @@ export class WorldInputManager extends Actor {
         this.graphics.visible = false;
 
         this.actionMap = {
-            [WorldAction.Toggle]: (released?: boolean) => this.world.setSimulationSpeed(released ? 1 : 0),
-            [WorldAction.Pause]: () => this.world.setSimulationSpeed(0),
-            [WorldAction.Play]: () => this.world.setSimulationSpeed(1),
+            [WorldAction.Toggle]: (released?: boolean) => this.simulation.emit(released ? 'start' : 'stop', undefined),
+            [WorldAction.Pause]: () => this.simulation.emit('stop', undefined),
+            [WorldAction.Play]: () => this.simulation.emit('start', undefined),
             [WorldAction.Force]: (released?: boolean) => this.toggleOverrideWorld(released === undefined ? undefined : !released),
             [WorldAction.IncreaseDrawSize]: () => this.setDrawRadius(this.drawRadius + 1),
             [WorldAction.DecreaseDrawSize]: () => this.setDrawRadius(this.drawRadius - 1),
@@ -83,6 +83,10 @@ export class WorldInputManager extends Actor {
             },
             [WorldAction.Erase]: released => this.toggleErase(released === undefined ? undefined : !released),
         };
+
+        this.simulation.on('onFocus', () => this.toggleVisible(true));
+        this.simulation.on('offFocus', () => this.toggleVisible(false));
+        this.simulation.on('changeElement', this.changeElement.bind(this));
     }
 
     onInitialize(engine: Engine) {
@@ -93,7 +97,7 @@ export class WorldInputManager extends Actor {
         engine.input.keyboard.on("release", ({key}) => this.handleInputEvent(key, true));
     }
 
-    updatePointer():void {
+    updatePointer(): void {
         this.canvas.flagDirty({
             isErasing: this.isErasing,
             overrideWorld: this.overrideWorld,
@@ -120,12 +124,12 @@ export class WorldInputManager extends Actor {
         this.updatePointer();
     }
 
-    changeElement(name: ElementIdentifier): void {
-        if (Elements[name]?.canDraw === false) {
+    changeElement(element: ElementIdentifier): void {
+        if (Elements[element]?.canDraw === false || this.element === element) {
             return;
         }
 
-        this.element = name;
+        this.element = element;
 
         this.updatePointer();
     }
@@ -173,20 +177,13 @@ export class WorldInputManager extends Actor {
     }
 
     private draw(coordinate: Coordinate): void {
-        if (!this.isErasing) {
-            this.world.createParticles(
-                coordinate,
-                this.element,
-                this.drawRadius,
-                Elements[this.element].drawProbability ?? 1,
-                this.overrideWorld,
-            );
-        } else {
-            this.world.removeParticles(
-                coordinate,
-                this.drawRadius,
-            );
-        }
+        this.simulation.emit(this.isErasing ? 'removeParticles' : 'createParticles', {
+            coordinate,
+            element: this.element,
+            radius: this.drawRadius,
+            probability: Elements[this.element].drawProbability,
+            force: this.overrideWorld,
+        });
     }
 
     private startDrawing(): void {

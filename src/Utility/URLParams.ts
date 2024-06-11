@@ -11,7 +11,7 @@ export class URLParams {
 
     static get<CastTo extends Identifier<CastMap>>(param: string, castTo: CastTo): CastMap[CastTo] | null {
         const paramValue = URLParams.search.get(param);
-        if (paramValue === null || paramValue.length === 0) {
+        if (paramValue === null) {
             return null;
         }
 

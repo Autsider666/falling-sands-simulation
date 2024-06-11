@@ -1,5 +1,9 @@
 import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
-import {ElementIdentifier} from "../../Elements.ts";
+import {
+    CreateParticlesEvent,
+    RemoveParticlesEvent,
+    SimulationInterface
+} from "../../SimulationInterface.ts";
 import {Coordinate} from "../../Utility/Traversal.ts";
 import {Element} from "../Particle/Element.ts";
 import {Actor, Canvas, Engine, PointerAbstraction, Random, Vector} from "excalibur";
@@ -7,7 +11,7 @@ import {DirtyCanvas} from "../../Utility/DirtyCanvas.ts";
 import Stats from '../../Utility/Stats/Stats.ts';
 import {WorldDraw} from "./WorldDraw.ts";
 
-export class World extends Actor {
+export class WorldActor extends Actor {
     private readonly matrix: CellularMatrix;
     private readonly canvas: Canvas;
     private readonly random = new Random();
@@ -24,11 +28,11 @@ export class World extends Actor {
     private worldDraw: WorldDraw;
 
     constructor(
+        private readonly simulation: SimulationInterface,
         gridHeight: number,
         gridWidth: number,
         private readonly particleSize: number,
-        private dimensionalWraparound: boolean = false,
-        debug:boolean = false,
+        debug: boolean = false,
     ) {
         super({
             height: gridHeight * particleSize,
@@ -40,7 +44,7 @@ export class World extends Actor {
             gridWidth,
         );
 
-        this.worldDraw = new WorldDraw(this.width,this.height,particleSize);
+        this.worldDraw = new WorldDraw(this.width, this.height, particleSize);
 
         this.canvas = new DirtyCanvas({
             height: gridHeight * particleSize,
@@ -51,11 +55,17 @@ export class World extends Actor {
 
         this.graphics.use(this.canvas);
 
+        this.simulation.on('start', () => this.setSimulationSpeed(1));
+        this.simulation.on('stop', () => this.setSimulationSpeed(0));
+        this.simulation.on('restart', () => this.restart());
+        this.simulation.on('createParticles', this.createParticles.bind(this));
+        this.simulation.on('removeParticles', this.removeParticles.bind(this));
 
         if (!debug) {
             return;
         }
 
+        // TODO move this to UI part and handle with events?
         this.stats = new Stats({
             width: 100,
             height: 60,
@@ -110,12 +120,18 @@ export class World extends Actor {
         this.stats?.end({draws: {value: this.particleDrawCount}});
     }
 
-    public createParticles(pos: Coordinate, type: ElementIdentifier, radius: number = 1, probability: number = 1, override: boolean = false) {
+    public createParticles({
+                               coordinate,
+                               element,
+                               force = false,
+                               radius = 1,
+                               probability = 1
+                           }: CreateParticlesEvent) {
         this.iterateAroundCoordinate(
-            pos,
+            coordinate,
             index => {
-                if (override || this.matrix.getIndex(index) === undefined) {
-                    this.matrix.setIndex(index, Element.create(index, type));
+                if (force || this.matrix.getIndex(index) === undefined) {
+                    this.matrix.setIndex(index, Element.create(index, element));
                 }
             },
             radius,
@@ -123,10 +139,14 @@ export class World extends Actor {
         );
     }
 
-    public removeParticles(pos: Coordinate, radius: number = 1, probability: number = 1) {
+    public removeParticles({
+                               coordinate,
+                               radius = 1,
+                               probability = 1
+                           }: RemoveParticlesEvent) {
         const removed: number[] = [];
         this.iterateAroundCoordinate(
-            pos,
+            coordinate,
             index => this.matrix.getIndex(index) !== undefined ? removed.push(index) && this.matrix.setIndex(index, undefined) : undefined,
             radius,
             probability,
@@ -135,16 +155,16 @@ export class World extends Actor {
         for (const index of removed) {
             this.iterateAroundCoordinate(
                 this.matrix.toCoordinates(index),
-                    neighbor=> {
-                    if(neighbor === index){
+                neighbor => {
+                    if (neighbor === index) {
                         console.log('Does this happen?');
                     }
 
-                        this.matrix.getIndex(neighbor)?.triggerFreeFalling();
+                    this.matrix.getIndex(neighbor)?.triggerFreeFalling();
                     if (this.matrix.getIndex(neighbor)) {
                         console.log(this.matrix.getIndex(neighbor));
                     }
-                    },
+                },
                 1);
         }
     }
@@ -155,14 +175,14 @@ export class World extends Actor {
         const {x, y} = this.toGridCoordinates(pos);
         for (let dX = -radius; dX <= radius; dX++) {
             for (let dY = -radius; dY <= radius; dY++) {
-                if (dX * dX + dY * dY <= radiusSquared && (probability >= 1 ||this.random.bool(probability))) {
+                if (dX * dX + dY * dY <= radiusSquared && (probability >= 1 || this.random.bool(probability))) {
                     const resultingY = y + dY;
                     if (resultingY < 0 || resultingY >= this.matrix.height - 1) {
                         continue;
                     }
 
                     const resultingX = x + dX;
-                    if (this.dimensionalWraparound || resultingX >= 0 && resultingX < this.matrix.width - 1) {
+                    if (resultingX >= 0 && resultingX < this.matrix.width - 1) {
                         const index = this.matrix.toIndex(resultingX, resultingY);
                         callback(index, {x: resultingX, y: resultingY});
                     }
@@ -178,16 +198,12 @@ export class World extends Actor {
         return {x, y};
     }
 
-    clear() {
+    restart() {
         this.matrix.clear();
         this.cleared = true;
     }
 
     setSimulationSpeed(speed: number) {
         this.simulationSpeed = Math.max(0, speed);
-    }
-
-    toggleDimensionalWraparound(): void {
-        this.dimensionalWraparound = !this.dimensionalWraparound;
     }
 }

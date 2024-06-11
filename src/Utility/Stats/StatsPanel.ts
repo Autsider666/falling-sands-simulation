@@ -39,7 +39,7 @@ export default class StatsPanel {
             show = false,
         }: PanelConfig = {}) {
 
-        this.pixelRatio = Math.round(window.devicePixelRatio || 1);
+        this.pixelRatio = Math.round(window ? window.devicePixelRatio : 1);
 
         this.width = width * this.pixelRatio;
         this.height = height * this.pixelRatio;
