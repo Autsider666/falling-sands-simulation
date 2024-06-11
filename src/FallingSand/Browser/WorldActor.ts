@@ -2,11 +2,11 @@ import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
 import {
     SimulationInterface
 } from "../../SimulationInterface.ts";
+import {DirtyCanvas} from "../../Utility/DirtyCanvas.ts";
 import {Coordinate} from "../../Utility/Traversal.ts";
 import {Actor, Canvas, Vector} from "excalibur";
-import {DirtyCanvas} from "../../Utility/DirtyCanvas.ts";
 import Stats from '../../Utility/Stats/Stats.ts';
-import {WorldCanvasManager} from "./WorldCanvasManager.ts";
+import {WorldCanvasManager} from "../World/WorldCanvasManager.ts";
 
 export class WorldActor extends Actor {
     private readonly matrix: CellularMatrix;
@@ -130,7 +130,7 @@ export class WorldActor extends Actor {
 
     restart() {
         this.matrix.clear();
-        this.cleared = true;
+        // this.cleared = true;
     }
 
     setSimulationSpeed(speed: number) {

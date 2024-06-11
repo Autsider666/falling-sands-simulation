@@ -1,5 +1,4 @@
 import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
-import {Air} from "../Particle/Air.ts";
 
 type WorldDrawState = {
     cleared: boolean,
@@ -9,30 +8,33 @@ export class WorldCanvasManager {
     constructor(
     private readonly    width:number,
     private readonly   height:number,
-    private readonly particleSize: number,
+    public readonly particleSize: number,
     ) {
     }
 
     update(
-        ctx: CanvasRenderingContext2D,
+        ctx: CanvasRenderingContext2D|OffscreenCanvasRenderingContext2D,
         matrix: CellularMatrix,
         {            cleared
         }: WorldDrawState
     ): number {
         if (cleared) {
-            ctx.fillStyle = Air.baseColor;
-            ctx.fillRect(0, 0, this.width, this.height);
-            // this.cleared = false; //TODO make sure this is moved to World and worker
+            ctx.clearRect(0, 0, this.width, this.height);
+            // ctx.fillStyle = transparent;
+            // ctx.fillStyle = Air.baseColor;
+            // ctx.fillRect(0, 0, this.width, this.height);
         }
 
         for (const index of matrix.changedIndexes) {
             const particle = matrix.getIndex(index);
 
             const {x, y} = matrix.toCoordinates(index);
-
-            ctx.fillStyle = particle ? particle.color : Air.baseColor;
-
-            ctx.fillRect(x * this.particleSize, y * this.particleSize, this.particleSize, this.particleSize);
+            if (particle) {
+                ctx.fillStyle = particle.color;
+                ctx.fillRect(x * this.particleSize, y * this.particleSize, this.particleSize, this.particleSize);
+            } else {
+                ctx.clearRect(x * this.particleSize, y * this.particleSize, this.particleSize, this.particleSize);
+            }
         }
 
         const  particleDrawCount = matrix.changedIndexes.size;

@@ -176,9 +176,9 @@ export class WorldInputManager extends Actor {
         this.updatePointer();
     }
 
-    private draw(coordinate: Coordinate): void {
+    private draw({x, y}: Coordinate): void {
         this.simulation.emit(this.isErasing ? 'removeParticles' : 'createParticles', {
-            coordinate,
+            coordinate: {x, y}, // To prevent vectors
             element: this.element,
             radius: this.drawRadius,
             probability: Elements[this.element].drawProbability,

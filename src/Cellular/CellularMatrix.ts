@@ -132,13 +132,10 @@ export class CellularMatrix extends Array2D<Particle | undefined> {
                 this.toCoordinates(index),
                 neighbor => {
                     if (neighbor === index) {
-                        console.log('Does this happen?');
+                        return;
                     }
 
                     this.getIndex(neighbor)?.triggerFreeFalling();
-                    if (this.getIndex(neighbor)) {
-                        console.log(this.getIndex(neighbor));
-                    }
                 },
                 1);
         }
@@ -155,7 +152,7 @@ export class CellularMatrix extends Array2D<Particle | undefined> {
             for (let dY = -radius; dY <= radius; dY++) {
                 if (dX * dX + dY * dY <= radiusSquared && (probability >= 1 || this.getRandomBool())) {
                     const resultingY = y + dY;
-                    if (resultingY < 0 || resultingY >= this.height - 1) {
+                    if (resultingY < 0 || resultingY >= this.height) {
                         continue;
                     }
 

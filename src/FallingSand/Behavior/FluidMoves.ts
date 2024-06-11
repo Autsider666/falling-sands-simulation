@@ -1,5 +1,5 @@
 import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
-import {Random} from "excalibur";
+import {Random} from "../../Utility/Excalibur/Random.ts";
 import {Moves} from "./Moves.ts";
 
 const random = new Random();

@@ -21,7 +21,7 @@ export class URLParams {
             case "boolean":
                 return ['', '1', 'true'].includes(paramValue) as CastMap[CastTo];
             case "number":
-                return Number.isNaN(paramValue) ? null : Number.parseInt(paramValue) as CastMap[CastTo];
+                return Number.isNaN(paramValue) || paramValue.length === 0 ? null : Number.parseInt(paramValue) as CastMap[CastTo];
         }
 
         return null;

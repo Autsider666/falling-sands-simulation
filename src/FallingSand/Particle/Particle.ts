@@ -1,6 +1,7 @@
-import {Random, Vector} from "excalibur";
 import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
 import {ColorVariance} from "../../Elements.ts";
+import {Random} from "../../Utility/Excalibur/Random.ts";
+import {Vector} from "../../Utility/Excalibur/Vector.ts";
 import {BaseBehaviourParams, Behavior} from "../Behavior/Behavior.ts";
 import {Constructor} from "../../Utility/Type.ts";
 

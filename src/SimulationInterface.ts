@@ -1,9 +1,6 @@
 import {ElementIdentifier} from "./Elements.ts";
+import {EventHandlerInterface} from "./Utility/Excalibur/Event/EventHandlerInterface.ts";
 import {Coordinate} from "./Utility/Traversal.ts";
-
-type EventMap = Record<string, unknown>;
-export type EventKey<T extends EventMap> = string & keyof T;
-export type Handler<EventType> = (event: EventType) => void;
 
 type ModifyParticlesEvent = {
     coordinate:Coordinate,
@@ -27,10 +24,5 @@ export type SimulationEvents = {
     removeParticles: RemoveParticlesEvent,
 };
 
-export interface SimulationInterface<TEvents extends EventMap = SimulationEvents> {
-    on<TEventName extends EventKey<TEvents>>(eventName: TEventName, handler: Handler<TEvents[TEventName]>): void;
-
-    off<TEventName extends EventKey<TEvents>>(eventName: TEventName, handler: Handler<TEvents[TEventName]>): void;
-
-    emit<TEventName extends EventKey<TEvents>>(eventName: TEventName, event: TEvents[TEventName]): void;
+export interface SimulationInterface extends EventHandlerInterface<SimulationEvents> {
 }
