@@ -34,7 +34,7 @@ export class BrowserSimulation implements SimulationInterface {
         this.engine = new Engine({
             width: this.worldWidth *  this.particleSize,
             height: this.worldHeight *  this.particleSize,
-            maxFps: 40,
+            maxFps: 30,
             backgroundColor: Color.Transparent,
             enableCanvasTransparency: true,
             canvasElement,

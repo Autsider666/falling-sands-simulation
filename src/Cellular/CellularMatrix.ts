@@ -95,18 +95,25 @@ export class CellularMatrix extends Array2D<Particle | undefined> {
         }
     }
 
+
     public createParticles({
                                coordinate,
                                element,
                                force = false,
                                radius = 1,
-                               probability = 1
-                           }: CreateParticlesEvent) {
+                               probability = 1,
+                           }: CreateParticlesEvent,
+                           blacklist?: Set<number>) {
         this.iterateAroundCoordinate(
             coordinate,
             index => {
+                if (blacklist?.has(index)) {
+                    return;
+                }
+
                 if (force || this.getIndex(index) === undefined) {
                     this.setIndex(index, Element.create(index, element));
+                    blacklist?.add(index);
                 }
             },
             radius,

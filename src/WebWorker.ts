@@ -3,7 +3,7 @@ import {WorkerMessage} from "./FallingSand/Worker/WorkerMessage.ts";
 import {WorkerWorldManager} from "./FallingSand/Worker/WorkerWorldManager.ts";
 import {SimulationEvents} from "./SimulationInterface.ts";
 
-const handler = new MessageHandler<WorkerMessage & SimulationEvents>();
+const handler = new MessageHandler<WorkerMessage & SimulationEvents>(undefined, false);
 
 
 let worldManager: WorkerWorldManager;
@@ -29,13 +29,14 @@ let elapsed: number = 0;
 const handleUpdate = () => {
     const now = Date.now();
     elapsed = now - then;
-    if (elapsed > fpsInterval) {
-        then = now - (elapsed % fpsInterval);
 
-        worldManager.update();
+    const nextStep = elapsed > fpsInterval;
+    worldManager.update(nextStep);
+
+    if (nextStep) {
+        then = now - (elapsed % fpsInterval);
         worldManager.render();
     }
-
     requestAnimationFrame(handleUpdate);
 };
 

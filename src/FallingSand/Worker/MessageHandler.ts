@@ -1,4 +1,4 @@
-import { EventEmitterInterface } from "../../Utility/Excalibur/Event/EventEmitterInterface.ts";
+import {EventEmitterInterface} from "../../Utility/Excalibur/Event/EventEmitterInterface.ts";
 import {EventHandler, EventKey, EventMap, Handler} from "../../Utility/Excalibur/Event/EventHandler.ts";
 import {EventHandlerInterface} from "../../Utility/Excalibur/Event/EventHandlerInterface.ts";
 import {MessageFormat, MessageIdentifier} from "./WorkerMessage.ts";
@@ -7,7 +7,7 @@ export class MessageHandler<TMessages extends EventMap> implements EventHandlerI
     private readonly events = new EventHandler<TMessages>();
     private readonly worker?: Worker;
 
-    constructor(worker?: Worker) {
+    constructor(worker?: Worker, debug?: boolean) {
         // @ts-expect-error No clue why PhpStorm doesn't understand the scopes
         if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
             self.onmessage = (message: MessageEvent<MessageFormat<TMessages>>) => {
@@ -29,6 +29,9 @@ export class MessageHandler<TMessages extends EventMap> implements EventHandlerI
                     return;
                 }
 
+                if (debug) {
+                    console.debug(Math.round(performance.now()),type, messageData.data);
+                }
                 this.handle(type, messageData.data);
             };
         } else {

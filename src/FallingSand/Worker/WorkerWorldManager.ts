@@ -1,5 +1,5 @@
 import {CellularMatrix} from "../../Cellular/CellularMatrix.ts";
-import {SimulationInterface} from "../../SimulationInterface.ts";
+import {CreateParticlesEvent, SimulationInterface} from "../../SimulationInterface.ts";
 import {Coordinate} from "../../Utility/Traversal.ts";
 import {WorldCanvasManager} from "../World/WorldCanvasManager.ts";
 
@@ -13,6 +13,8 @@ export class WorkerWorldManager {
     private simulationSpeed: number = 1;
 
     private cleared: boolean = true;
+
+    private creationQueue: CreateParticlesEvent[] = [];
 
     constructor(
         private readonly simulation: SimulationInterface,
@@ -36,10 +38,7 @@ export class WorkerWorldManager {
         this.simulation.on('stop', () => this.setSimulationSpeed(0));
         this.simulation.on('restart', () => this.restart());
         this.simulation.on('createParticles', event => {
-            this.matrix.createParticles({
-                ...event,
-                coordinate: this.toGridCoordinates(event.coordinate),
-            });
+            this.creationQueue.push(event);
         });
         this.simulation.on('removeParticles', event => {
             this.matrix.removeParticles({
@@ -49,8 +48,19 @@ export class WorkerWorldManager {
         });
     }
 
-    update(): void {
-        if (this.simulationSpeed > 0) {
+    update(simulateNextStep: boolean = true): void {
+        this.creationQueue.reverse();
+        const blacklist = new Set<number>();
+        for (const createParticlesEvent of this.creationQueue) {
+            const coordinate = this.toGridCoordinates(createParticlesEvent.coordinate);
+            this.matrix.createParticles({
+                ...createParticlesEvent,
+                coordinate,
+            }, blacklist);
+        }
+        this.creationQueue.length = 0;
+
+        if (simulateNextStep && this.simulationSpeed > 0) {
             this.matrix.simulate();
         }
     }
