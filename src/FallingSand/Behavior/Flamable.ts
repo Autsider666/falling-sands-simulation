@@ -144,4 +144,8 @@ export class Flammable extends LimitedLife {
             this.owner.dirty = true;
         }
     }
+
+    get isBurning(): boolean { //TODO just for now, but replace soon
+        return this.burning;
+    }
 }

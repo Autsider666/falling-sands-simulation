@@ -24,7 +24,7 @@ export abstract class Particle {
     public readonly density: number;
     private readonly behaviors: Map<Constructor<Behavior>, Behavior>;
     public dirty: boolean = false;
-    public isFreeFalling:boolean;
+    public isFreeFalling: boolean;
 
     public maxSpeed: number;
     public acceleration: Vector;
@@ -37,8 +37,8 @@ export abstract class Particle {
     ) {
         this.density = density ?? 0;
         this.maxSpeed = maxSpeed ?? 0;
-        this.acceleration = new Vector(0,acceleration ?? 0);
-        this.velocity = new Vector(0,0);
+        this.acceleration = new Vector(0, acceleration ?? 0);
+        this.velocity = new Vector(0, 0);
         this.behaviors = new Map<Constructor<Behavior>, Behavior>();
         this.addBehaviors(behaviors ?? []);
 
@@ -53,7 +53,7 @@ export abstract class Particle {
         this.currentIndex = index;
     }
 
-    triggerFreeFalling():void {
+    triggerFreeFalling(): void {
         this.isFreeFalling = true;
     }
 
@@ -80,9 +80,13 @@ export abstract class Particle {
         this.dirty = false;
     }
 
-    getBehavior<B extends Behavior>(type: Constructor<B>): B | undefined {
-        // @ts-expect-error I'll fix it later
-        return this.behaviors.get(type) as B | unknown; //FIXME
+    getBehavior<B extends Behavior>(behavior: Constructor<B>): B | undefined {
+        // @ts-expect-error FIXME I'll fix it later
+        return this.behaviors.get(behavior) as B | unknown; //FIXME
+    }
+
+    hasBehavior(behavior: Constructor<Behavior>): boolean {
+        return this.behaviors.has(behavior);
     }
 
     static varyColor(color: string, {

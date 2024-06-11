@@ -5,7 +5,7 @@ type WorldDrawState = {
     cleared: boolean,
 }
 
-export class WorldDraw {
+export class WorldCanvasManager {
     constructor(
     private readonly    width:number,
     private readonly   height:number,
@@ -13,7 +13,7 @@ export class WorldDraw {
     ) {
     }
 
-    drawCanvas(
+    update(
         ctx: CanvasRenderingContext2D,
         matrix: CellularMatrix,
         {            cleared

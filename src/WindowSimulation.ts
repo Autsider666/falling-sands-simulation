@@ -1,8 +1,8 @@
 import {Color, Engine, EventEmitter} from "excalibur";
 import {ElementIdentifier} from "./Elements.ts";
-import {WorldActor} from "./FallingSand/World/WorldActor.ts";
-import {WorldInputManager} from "./FallingSand/World/WorldInputManager.ts";
-import {WorldUIManager} from "./FallingSand/World/WorldUIManager.ts";
+import {WorldActor} from "./FallingSand/Browser/WorldActor.ts";
+import {WorldInputManager} from "./FallingSand/Browser/WorldInputManager.ts";
+import {WorldUIManager} from "./FallingSand/Browser/WorldUIManager.ts";
 import {EventKey, Handler, SimulationEvents, SimulationInterface} from "./SimulationInterface.ts";
 import {URLParams} from "./Utility/URLParams.ts";
 
